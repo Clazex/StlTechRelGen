@@ -32,9 +32,11 @@ internal sealed partial class Config {
 	}
 
 	public sealed class PlaysetConfig {
+		// Use empty string to indicate vanilla
 		public required string Name { get; set; }
 
-		public required string TargetMod { get; set; }
+		// When vanilla, this is output path
+		public required string Target { get; set; }
 	}
 
 	[TomlIgnore(Condition = TomlIgnoreCondition.WhenWritingDefault)]

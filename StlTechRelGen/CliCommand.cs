@@ -37,7 +37,7 @@ internal sealed class CliCommand : Command<CliCommand.CliArguments> {
 			},
 			Playset = new Config.PlaysetConfig {
 				Name = Playset,
-				TargetMod = TargetMod,
+				Target = TargetMod,
 			},
 			Update = new Config.UpdateConfig {
 				CheckUpdate = !NoCheckUpdate,

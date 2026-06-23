@@ -63,15 +63,15 @@ public static class Program {
 
 		Inquiries.PromptCloseLauncher(config);
 
-		(Mod targetMod, Mod[] mods) = await GetModsSelection(config);
-		DirectoryInfo destDir = new(Path.Combine(targetMod.Path(), "localisation", "replace"));
+		(string outPath, Mod[] mods) = await GetModsSelection(config);
+		DirectoryInfo outDir = new(outPath);
 
 		try {
-			destDir.Delete(true);
+			outDir.Delete(true);
 		} catch (DirectoryNotFoundException) {
 		}
 
-		destDir.Create();
+		outDir.Create();
 
 		(int countLocFiles, int countTechs, int countRelations) = await AnsiConsole
 			.Progress()
@@ -86,7 +86,7 @@ public static class Program {
 					.DriveProgressTask(ctx.AddTask(Messages.Progress.GeneratingLocalization))
 					.ForEach(i => l11nBuilder.BuildTech(i.Key, i.Value));
 
-				l11nBuilder.WriteFilesWithProgress(ctx, destDir.FullName);
+				l11nBuilder.WriteFilesWithProgress(ctx, outDir.FullName);
 
 				return (
 					l11nBuilder.Generated.Keys.Count,
@@ -96,7 +96,7 @@ public static class Program {
 				);
 			});
 
-		AnsiConsole.MarkupLine(Messages.Prompt.SavedLocalization.Format(countLocFiles, destDir.FullName));
+		AnsiConsole.MarkupLine(Messages.Prompt.SavedLocalization.Format(countLocFiles, outDir.FullName));
 		AnsiConsole.MarkupLine(Messages.Prompt.GenerationSummary.Format(countRelations, countTechs));
 		if (!config.Yesmen) {
 			Inquiries.Pause();
@@ -105,34 +105,50 @@ public static class Program {
 		updateChecker?.TryReport();
 	}
 
-	private static async Task<(Mod targetMod, Mod[] mods)> GetModsSelection(Config config) {
+	private static async Task<(string destPath, Mod[] mods)> GetModsSelection(Config config) {
 		using LauncherV2DbContext db = await Inquiries.ProgressRunAsync(Messages.Progress.ConnectingLauncherDb,
 			() => new LauncherV2DbContext(config.Game)
 		);
 
-		if (!TryUseSavedPlaysetData(config, db, out Mod? targetMod, out List<Mod>? mods)) {
-			Playset playset = Inquiries.ChoosePlayset(db);
-			mods = [.. db.GetModsInPlayset(playset)];
-
-			targetMod = Inquiries.ChooseTargetMod(mods);
-			mods.Remove(targetMod);
-
-			Inquiries.PromptSavePlaysetData(config, playset.Name, targetMod.DisplayName!);
+		if (TryUseSavedPlaysetData(config, db, out string? outPath, out List<Mod>? mods)) {
+			return (outPath, [.. mods]);
 		}
 
-		return (targetMod, [.. mods]);
+		Playset playset = Inquiries.ChoosePlayset(db);
+		if (string.IsNullOrEmpty(playset.Name)) {
+			outPath = Inquiries.ChooseOutputPath();
+			mods = [];
+			Inquiries.PromptSaveTarget(config, playset.Name, outPath);
+			return (outPath, [.. mods]);
+		}
+
+		mods = [.. db.GetModsInPlayset(playset)];
+
+		Mod targetMod = Inquiries.ChooseTargetMod(mods);
+		mods.Remove(targetMod);
+		outPath = Path.Combine(targetMod.Path(), "localisation", "replace");
+
+		Inquiries.PromptSaveTarget(config, playset.Name, targetMod.DisplayName!);
+		return (outPath, [.. mods]);
 	}
 
-	private static bool TryUseSavedPlaysetData(Config config, LauncherV2DbContext db, [NotNullWhen(true)] out Mod? targetMod, [NotNullWhen(true)] out List<Mod>? mods) {
-		targetMod = null;
+	private static bool TryUseSavedPlaysetData(Config config, LauncherV2DbContext db, [NotNullWhen(true)] out string? outPath, [NotNullWhen(true)] out List<Mod>? mods) {
+		outPath = null;
 		mods = null;
 
 		if (config.Playset == null) {
 			return false;
 		}
 
-		if (!Inquiries.ConfirmUseSavedPlaysetData(config)) {
+		if (!Inquiries.ConfirmUseSavedTarget(config)) {
 			return false;
+		}
+
+		// Vanilla game
+		if (string.IsNullOrEmpty(config.Playset.Name)) {
+			outPath = config.Playset.Target;
+			mods = [];
+			return true;
 		}
 
 		Playset? playset = db.Playsets.SingleOrDefault(i => i.Name == config.Playset!.Name);
@@ -142,7 +158,7 @@ public static class Program {
 		}
 
 		mods = [.. db.GetModsInPlayset(playset)];
-		Mod[] targetModCandidates = [.. mods.Where(i => i.DisplayName == config.Playset.TargetMod)];
+		Mod[] targetModCandidates = [.. mods.Where(i => i.DisplayName == config.Playset.Target)];
 		if (targetModCandidates.Length == 0) {
 			LogError(Messages.Error.TargetModNotFound);
 			return false;
@@ -156,8 +172,9 @@ public static class Program {
 			return false;
 		}
 
-		targetMod = targetModCandidates[0];
+		Mod targetMod = targetModCandidates[0];
 		mods.Remove(targetMod);
+		outPath = Path.Combine(targetMod.Path(), "localisation", "replace");
 		return true;
 	}
 }

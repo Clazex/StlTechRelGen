@@ -20,6 +20,16 @@ internal static class Extensions {
 			?? throw new InvalidDataException($"Mod {self.DisplayName} has no path");
 	}
 
+	extension(Db.LauncherV2DbContext self) {
+		public IOrderedQueryable<Db.Mod> GetModsInPlayset(Db.Playset playset) {
+			IQueryable<Db.PlaysetsMod> playsetMods = self.PlaysetsMods
+				.Where(i => (i.Enabled ?? false) && i.PlaysetId == playset.Id);
+			return self.Mods
+				.Where(i => i.Status == "ready_to_play" && playsetMods.Any(j => j.ModId == i.Id))
+				.OrderBy(i => playsetMods.Single(j => j.ModId == i.Id).Position);
+		}
+	}
+
 	extension(string self) {
 		public string CommonPrefix(string other, StringComparison comparison = default) {
 			if (string.IsNullOrEmpty(self) || string.IsNullOrEmpty(other)) {

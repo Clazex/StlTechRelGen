@@ -10,14 +10,6 @@ internal sealed partial class LauncherV2DbContext(Config.GameConfig config) : Db
 
 	public DbSet<PlaysetsMod> PlaysetsMods { get; private set; }
 
-	public IOrderedQueryable<Mod> GetModsInPlayset(Playset playset) {
-		IQueryable<PlaysetsMod> playsetMods = PlaysetsMods
-			.Where(i => (i.Enabled ?? false) && i.PlaysetId == playset.Id);
-		return Mods
-			.Where(i => i.Status == "ready_to_play" && playsetMods.Any(j => j.ModId == i.Id))
-			.OrderBy(i => playsetMods.Single(j => j.ModId == i.Id).Position);
-	}
-
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder
 		.UseModel(LauncherV2DbContextModel.Instance)
 		.UseSqlite(

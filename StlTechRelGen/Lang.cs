@@ -54,13 +54,16 @@ internal sealed class Lang {
 		public required string ConfigCreated { get; init; }
 
 		public required string CloseLauncher { get; init; }
-		public required CompositeFormat ConfirmUseSavedPlaysetData { get; init; }
+		public required CompositeFormat ConfirmUseSavedVanilla { get; init; }
+		public required CompositeFormat ConfirmUseSavedTarget { get; init; }
 		public required string ChoosePlayset { get; init; }
 		public required string CurrentPlaysetPrefix { get; init; }
+		public required string AskOutputPath { get; init; }
 		public required string ChooseTargetMod { get; init; }
 		public required string CollidingTargetModListHeader { get; init; }
 		public required CompositeFormat CollidingTargetModListItem { get; init; }
-		public required CompositeFormat ConfirmSavePlaysetData { get; init; }
+		public required CompositeFormat ConfirmSaveVanilla { get; init; }
+		public required CompositeFormat ConfirmSaveTarget { get; init; }
 
 
 		public required CompositeFormat SavedLocalization { get; init; }

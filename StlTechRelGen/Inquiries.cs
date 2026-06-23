@@ -52,25 +52,34 @@ internal static class Inquiries {
 		} while (IsLauncherOpen());
 	}
 
-	internal static bool ConfirmUseSavedPlaysetData(Config config) {
+	internal static bool ConfirmUseSavedTarget(Config config) {
 		if (config.Yesmen) {
 			return true;
 		}
 
-		return Confirm(Messages.Prompt.ConfirmUseSavedPlaysetData.Format(
-			Escape(config.Playset!.Name), Escape(config.Playset.TargetMod)
-		));
+		return Confirm(
+			(string.IsNullOrEmpty(config.Playset!.Name)
+				? Messages.Prompt.ConfirmUseSavedVanilla
+				: Messages.Prompt.ConfirmUseSavedTarget
+			).Format(
+				Escape(config.Playset!.Name), Escape(config.Playset.Target)
+			)
+		);
 	}
 
 	internal static Playset ChoosePlayset(LauncherV2DbContext db) => Prompt(new SelectionPrompt<Playset>()
 		.UsePreset()
 		.Title(Messages.Prompt.ChoosePlayset)
 		.AddChoices(db.Playsets.OrderByDescending(i => i.IsActive))
+		.AddCancelResult(new Playset() { Name = "", IsActive = false })
 		.UseConverter(i => i.IsActive ?? false
 			? Messages.Prompt.CurrentPlaysetPrefix + Escape(i.Name)
 			: Escape(i.Name)
 		)
 	);
+
+	internal static string ChooseOutputPath() =>
+		Path.GetFullPath(Ask<string>(Messages.Prompt.AskOutputPath));
 
 	internal static Mod ChooseTargetMod(IEnumerable<Mod> mods) => Prompt(new SelectionPrompt<Mod>()
 		.UsePreset()
@@ -81,17 +90,22 @@ internal static class Inquiries {
 		.UseConverter(i => $"[white]{Escape(i.DisplayName!)}[/] [dim]({Escape(i.Path())}[/])")
 	);
 
-	internal static void PromptSavePlaysetData(Config config, string playsetName, string targetModName) {
-		if (!config.Yesmen && !Confirm(Messages.Prompt.ConfirmSavePlaysetData.Format(
-			Escape(playsetName),
-			Escape(targetModName)
-		))) {
+	internal static void PromptSaveTarget(Config config, string playsetName, string targetModName) {
+		if (!config.Yesmen && !Confirm((
+			string.IsNullOrEmpty(playsetName)
+				? Messages.Prompt.ConfirmSaveVanilla
+				: Messages.Prompt.ConfirmSaveTarget
+			).Format(
+				Escape(playsetName),
+				Escape(targetModName)
+			)
+		)) {
 			return;
 		}
 
 		config.Playset = new() {
 			Name = playsetName,
-			TargetMod = targetModName
+			Target = targetModName
 		};
 		config.Save();
 	}
