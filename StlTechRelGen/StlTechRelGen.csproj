@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Version>0.1.0</Version> <!--
+			This is used by update checker, and therefore must be
+			the same as git tag name with no "v" prefix
+		-->
+		<RootNamespace>StlTechRelGen</RootNamespace>
+
+		<LangVersion>preview</LangVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<RestoreLockedMode Condition="'$(CI)' == 'true'">True</RestoreLockedMode>
+
+		<AnalysisMode>Recommended</AnalysisMode>
+		<NoWarn>$(NoWarn);CA1716</NoWarn> <!-- Suppression: mod is reserved keyword -->
+
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<DebugType>portable</DebugType>
+
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>false</SelfContained>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$(Configuration) == 'Release'">
+		<PathMap>$(MSBuildProjectDirectory)=/</PathMap>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CWTools" Version="0.5.0-alpha" />
+		<PackageReference Include="FSharp.Core" Version="10.1.301" />
+
+		<PackageReference Include="Tomlyn" Version="2.8.0" />
+		<PackageReference Include="YamlDotNet" Version="18.0.0" />
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="10.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="SQLitePCLRaw.config.e_sqlite3" Version="3.0.3" />
+		<!--
+			Use newer shipped native SQLite builds instead of the vulnerable
+			SQLitePCLRaw.lib.e_sqlite3 package (CVE-2025-6965) use by
+			Microsoft.EntityFrameworkCore.Sqlite
+		-->
+		<PackageReference Include="SourceGear.sqlite3" Version="3.50.4.5" />
+
+		<PackageReference Include="Spectre.Console" Version="0.57.0" />
+		<PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources/lang/*.toml" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$(Configuration) == 'Debug'">
+		<Content Condition="Exists('config.toml')" Include="config.toml">
+			<TargetPath>$(AssemblyName).toml</TargetPath>
+			<CopyToOutputDirectory>IfDifferent</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+</Project>
