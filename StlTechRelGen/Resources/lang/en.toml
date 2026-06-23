@@ -1,0 +1,55 @@
+[prompt]
+search_placeholder_text = "(Type to search)"
+more_choices_text = "(Move up and down to reveal more choices)"
+
+generate_new_config = "New config will be generated...\n"
+
+welcome = "Welcome to [gold1]Stellaris Tech Relation Generator[/]!"
+read_instructions = "Make sure to [cyan]read instructions[/] carefully!"
+pause = "Press [cyan]Enter[/] to continue..."
+
+ask_game_path = "[white]What is your [cyan]game path[/]?[/]"
+inferred_document_path = "The inferred [cyan]document path[/] based on your OS is: [green]{0}[/]"
+confirm_document_path = "[white]Is this correct?[/]"
+ask_document_path = "[white]What is your [cyan]document path[/]?[/]"
+cannot_infer_document_path = "Cannot infer [cyan]document path[/] since your OS is unknown"
+config_created = "[green]Config successfully created![/]"
+
+close_launcher = "Please [cyan]close the launcher[/] before continuing"
+confirm_use_saved_playset_data = "Use saved playset [yellow]{0}[/] with target mod [yellow]{1}[/]?"
+choose_playset = "Choose the desired playset"
+current_playset_prefix = "[green](Current)[/] "
+choose_target_mod = "Choose target mod to output generated files"
+colliding_target_mod_list_header = "Path of these mods are listed below:"
+colliding_target_mod_list_item = "  - {0}"
+confirm_save_playset_data = "Save selection? (Playset: [yellow]{0}[/], target mod: [yellow]{1}[/])"
+
+saved_localization = "Written [cyan]{0}[/] localization files to [grey underline]{1}[/]"
+generation_summary = "[green]Successfully generated [cyan]{0}[/] relation entries for [cyan]{1}[/] techs![/]"
+
+[progress]
+connecting_launcher_db = "Connecting to launcher database"
+loading_game = "Loading game (CWTools)"
+loading_scripted_variables = "Loading scripted variables"
+loading_authority_suffixes = "Loading authority suffixes"
+loading_technologies = "Loading technologies"
+building_tech_relationship = "Building tech relationship"
+loading_localization = "Loading localization"
+generating_localization = "Generating localization"
+writing_localization = "Writing localization"
+
+[data]
+localization_entry_not_found = "Localization entry of {0} not found"
+localization_entry_and_swap_not_found = "Localization entry of {0} and swap {1} not found"
+tech_unknown_prereq = "Tech {0} has unknown prereq: {1}"
+tech_unnamed_swap = "[red]Tech {0} has an unnamed swap, skipping it[/]"
+
+[update]
+new_version_found = "[gold1]New version found! [link={0}]{1}[/] ({2:g})[/]"
+release_body = "[grey]{0}[/]"
+
+[error]
+config_parse_failed = "[red]Failed to parse config: [/]"
+playset_not_found = "Playset not found!"
+target_mod_not_found = "Target mod not found!"
+multiple_mods_same_name = "Multiple mods with same name detected"
