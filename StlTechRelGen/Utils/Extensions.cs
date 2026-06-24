@@ -1,16 +1,4 @@
-using System.Globalization;
-using System.Text;
-
-using CWTools.Common;
-
 using Microsoft.FSharp.Collections;
-using Microsoft.FSharp.Core;
-
-using Spectre.Console;
-
-using static StlTechRelGen.Lang;
-
-using CWLang = CWTools.Common.Lang;
 
 namespace StlTechRelGen.Utils;
 

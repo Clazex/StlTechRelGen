@@ -1,12 +1,3 @@
-using System.Collections.ObjectModel;
-
-using Spectre.Console;
-
-using StlTechRelGen.Utils;
-
-using static StlTechRelGen.Lang;
-using static StlTechRelGen.Utils.LogHelper;
-
 namespace StlTechRelGen.Model;
 
 internal sealed class TechTable {

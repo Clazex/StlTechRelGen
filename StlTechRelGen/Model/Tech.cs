@@ -1,13 +1,3 @@
-using Microsoft.FSharp.Core;
-
-using StlTechRelGen.Utils;
-
-using static StlTechRelGen.Lang;
-using static StlTechRelGen.Utils.LogHelper;
-
-using CWNode = CWTools.Process.Node;
-using CWValue = CWTools.Parser.Types.Value;
-
 namespace StlTechRelGen.Model;
 
 internal sealed class Tech(

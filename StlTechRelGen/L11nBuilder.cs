@@ -1,18 +1,4 @@
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Text;
-
-using CWTools.Common;
-
-using Spectre.Console;
-
 using StlTechRelGen.Model;
-using StlTechRelGen.Utils;
-
-using static StlTechRelGen.Lang;
-using static StlTechRelGen.Utils.LogHelper;
-
-using CWLang = CWTools.Common.Lang;
 
 namespace StlTechRelGen;
 

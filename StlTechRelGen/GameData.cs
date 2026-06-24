@@ -1,27 +1,15 @@
 using System.Collections.Concurrent;
-using System.Collections.ObjectModel;
 using System.IO.Compression;
-using System.Reflection;
 
-using CWTools.Common;
 using CWTools.Games;
 using CWTools.Validation;
 
 using Microsoft.FSharp.Collections;
-using Microsoft.FSharp.Core;
-
-using Spectre.Console;
 
 using StlTechRelGen.Model;
-using StlTechRelGen.Utils;
 
 using static CWTools.Games.Files;
 
-using static StlTechRelGen.Lang;
-
-using CWValue = CWTools.Parser.Types.Value;
-using SECData = CWTools.Games.ScriptedEffectComputedData;
-using STLGameObject = CWTools.Games.GameObject<CWTools.Games.ScriptedEffectComputedData, CWTools.Games.STLLookup>;
 
 namespace StlTechRelGen;
 
@@ -43,7 +31,7 @@ internal sealed class GameData {
 	public ReadOnlyDictionary<string, CWValue> ScriptedVariables { get; private set; } = null!;
 	public ReadOnlyCollection<string> AuthSuffixes { get; private set; } = null!;
 	public TechTable TechTable { get; private set; } = null!;
-	public ReadOnlyDictionary<CWTools.Common.Lang, ReadOnlyDictionary<string, string>> Localizations = null!;
+	public ReadOnlyDictionary<CWLang, ReadOnlyDictionary<string, string>> Localizations = null!;
 
 	private GameData(Config config, IEnumerable<(string name, string path)> mods) {
 		string commonDir = Path.Combine(config.Game.GamePath, "common");

@@ -1,17 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Text;
 
-using Microsoft.FSharp.Core;
-
-using Spectre.Console;
 using Spectre.Console.Cli;
 
 using StlTechRelGen.Db;
-using StlTechRelGen.Utils;
-
-using static StlTechRelGen.Lang;
-using static StlTechRelGen.Utils.LogHelper;
 
 namespace StlTechRelGen;
 

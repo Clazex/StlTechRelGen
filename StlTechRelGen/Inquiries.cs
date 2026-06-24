@@ -1,13 +1,8 @@
 using System.Diagnostics;
 
-using Spectre.Console;
-
 using StlTechRelGen.Db;
-using StlTechRelGen.Utils;
 
 using static Spectre.Console.AnsiConsole;
-
-using static StlTechRelGen.Lang;
 
 namespace StlTechRelGen;
 

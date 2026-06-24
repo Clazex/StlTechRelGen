@@ -2,8 +2,6 @@ using System.ComponentModel;
 
 using Spectre.Console.Cli;
 
-using StlTechRelGen.Utils;
-
 namespace StlTechRelGen;
 
 internal sealed class CliCommand : Command<CliCommand.Settings> {

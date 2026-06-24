@@ -1,12 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
-using Spectre.Console;
-
-using StlTechRelGen.Utils;
-
-using static StlTechRelGen.Lang;
-
 namespace StlTechRelGen;
 
 internal sealed partial class UpdateChecker(Config.UpdateConfig config) {

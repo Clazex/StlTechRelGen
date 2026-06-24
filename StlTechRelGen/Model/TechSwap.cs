@@ -1,7 +1,3 @@
-using StlTechRelGen.Utils;
-
-using CWNode = CWTools.Process.Node;
-
 namespace StlTechRelGen.Model;
 
 internal sealed class TechSwap(

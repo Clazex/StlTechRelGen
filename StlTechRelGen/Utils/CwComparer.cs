@@ -1,8 +1,5 @@
 using static CWTools.Games.Files;
 
-using CWNode = CWTools.Process.Node;
-using CWRange = CWTools.Utilities.Position.range;
-
 namespace StlTechRelGen.Utils;
 
 internal sealed class CWComparer(WorkspaceDirectory GameDir, WorkspaceDirectoryInput[] ModDirs) : IComparer<CWNode>, IComparer<CWTools.Localisation.Entry>, IComparer<CWRange> {

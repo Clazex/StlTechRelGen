@@ -1,5 +1,3 @@
-using Spectre.Console;
-
 namespace StlTechRelGen.Utils;
 
 internal static class LogHelper {

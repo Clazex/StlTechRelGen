@@ -1,14 +1,6 @@
 using Tomlyn;
 using Tomlyn.Serialization;
 
-using Spectre.Console;
-using Spectre.Console.Cli;
-
-using StlTechRelGen.Utils;
-
-using static StlTechRelGen.Lang;
-using static StlTechRelGen.Utils.LogHelper;
-
 namespace StlTechRelGen;
 
 internal sealed partial class Config {
