@@ -26,6 +26,12 @@ internal static class Inquiries {
 		.UsePreset()
 		.StartAsync(async (ctx) => ProgressRun(ctx, desc, func));
 
+	public static void ProgressRun(ProgressContext ctx, string desc, Action func) {
+		ProgressTask task = ctx.AddTask(desc).IsIndeterminate().MaxValue(1);
+		func();
+		task.Value(1).StopTask();
+	}
+
 	public static T ProgressRun<T>(ProgressContext ctx, string desc, Func<T> func) {
 		ProgressTask task = ctx.AddTask(desc).IsIndeterminate().MaxValue(1);
 		T result = func();
@@ -78,7 +84,7 @@ internal static class Inquiries {
 		)
 	);
 
-	internal static string ChooseOutputPath() =>
+	internal static string AskOutputPath() =>
 		Path.GetFullPath(Ask<string>(Messages.Prompt.AskOutputPath));
 
 	internal static Mod ChooseTargetMod(IEnumerable<Mod> mods) => Prompt(new SelectionPrompt<Mod>()

@@ -31,6 +31,13 @@ internal static partial class GlobalInstances {
 	)]
 	internal static partial Regex RegexLocReference();
 
+	internal static readonly FileStreamOptions FileWriteOptions = new() {
+		Mode = FileMode.Create,
+		Access = FileAccess.Write,
+		Share = FileShare.None,
+		Options = FileOptions.SequentialScan
+	};
+
 	static GlobalInstances() =>
 		Client.DefaultRequestHeaders.UserAgent.Add(new(
 			nameof(StlTechRelGen),

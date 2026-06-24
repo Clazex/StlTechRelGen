@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text;
 
 using Microsoft.FSharp.Core;
@@ -64,7 +65,7 @@ public static class Program {
 		Inquiries.PromptCloseLauncher(config);
 
 		(string outPath, Mod[] mods) = await GetModsSelection(config);
-		DirectoryInfo outDir = new(outPath);
+		DirectoryInfo outDir = new(Path.Combine(outPath, "localisation"));
 
 		try {
 			outDir.Delete(true);
@@ -86,7 +87,20 @@ public static class Program {
 					.DriveProgressTask(ctx.AddTask(Messages.Progress.GeneratingLocalization))
 					.ForEach(i => l11nBuilder.BuildTech(i.Key, i.Value));
 
-				l11nBuilder.WriteFilesWithProgress(ctx, outDir.FullName);
+				Assembly assembly = Assembly.GetExecutingAssembly();
+				const string fragmentPrefix = $"{nameof(StlTechRelGen)}.Resources.fragments.";
+				assembly
+					.GetManifestResourceNames()
+					.Where(i => i.StartsWith(fragmentPrefix, StringComparison.Ordinal))
+					.DriveProgressTask(ctx.AddTask(Messages.Progress.WritingLocalizationFragments))
+					.Select(i => i[fragmentPrefix.Length..])
+					.ForEach(i => {
+						using Stream stream = assembly.GetManifestResourceStream(fragmentPrefix + i)!;
+						using FileStream file = File.Open(Path.Combine(outDir.FullName, i), GlobalInstances.FileWriteOptions);
+						stream.CopyTo(file);
+					});
+
+				l11nBuilder.WriteFilesWithProgress(ctx, outDir.CreateSubdirectory("replace").FullName);
 
 				return (
 					l11nBuilder.Generated.Keys.Count,
@@ -116,7 +130,7 @@ public static class Program {
 
 		Playset playset = Inquiries.ChoosePlayset(db);
 		if (string.IsNullOrEmpty(playset.Name)) {
-			outPath = Inquiries.ChooseOutputPath();
+			outPath = Inquiries.AskOutputPath();
 			mods = [];
 			Inquiries.PromptSaveTarget(config, playset.Name, outPath);
 			return (outPath, [.. mods]);
@@ -126,7 +140,7 @@ public static class Program {
 
 		Mod targetMod = Inquiries.ChooseTargetMod(mods);
 		mods.Remove(targetMod);
-		outPath = Path.Combine(targetMod.Path(), "localisation", "replace");
+		outPath = Path.Combine(targetMod.Path());
 
 		Inquiries.PromptSaveTarget(config, playset.Name, targetMod.DisplayName!);
 		return (outPath, [.. mods]);
@@ -174,7 +188,7 @@ public static class Program {
 
 		Mod targetMod = targetModCandidates[0];
 		mods.Remove(targetMod);
-		outPath = Path.Combine(targetMod.Path(), "localisation", "replace");
+		outPath = Path.Combine(targetMod.Path());
 		return true;
 	}
 }

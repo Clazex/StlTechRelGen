@@ -76,6 +76,7 @@ internal sealed class Lang {
 		public required string BuildingTechRelationship { get; init; }
 		public required string LoadingLocalization { get; init; }
 		public required string GeneratingLocalization { get; init; }
+		public required string WritingLocalizationFragments { get; init; }
 		public required string WritingLocalization { get; init; }
 	}
 

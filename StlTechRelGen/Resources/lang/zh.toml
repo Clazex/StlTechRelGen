@@ -36,6 +36,7 @@ loading_technologies = "正在加载科技"
 building_tech_relationship = "正在构建科技关系"
 loading_localization = "正在加载本地化"
 generating_localization = "正在生成本地化"
+writing_localization_fragments = "正在写入本地化片段"
 writing_localization = "正在写入本地化"
 
 [data]

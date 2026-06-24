@@ -56,7 +56,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Resources/lang/*.toml" />
+		<EmbeddedResource Include="Resources/**" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(Configuration) == 'Debug'">

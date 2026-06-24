@@ -103,8 +103,8 @@ internal sealed class GameData {
 		));
 
 		Game = (STLGameObject) typeof(CWTools.Games.Stellaris.STLGame)
-				.GetField("game", BindingFlags.Instance | BindingFlags.NonPublic)!
-				.GetValue(stellaris)!;
+			.GetField("game", BindingFlags.Instance | BindingFlags.NonPublic)!
+			.GetValue(stellaris)!;
 		Entities = new(Game.Resources.AllEntities.Invoke(null));
 	}
 

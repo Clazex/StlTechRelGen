@@ -171,12 +171,7 @@ internal sealed class L11nBuilder(GameData gameData) {
 		using StreamWriter writer = new(
 			Path.Combine(destPath, $"techrel_l_{lang}.yml"),
 			GlobalInstances.Utf8Bom,
-			new FileStreamOptions() {
-				Mode = FileMode.Create,
-				Access = FileAccess.Write,
-				Share = FileShare.None,
-				Options = FileOptions.SequentialScan
-			}
+			GlobalInstances.FileWriteOptions
 		);
 		writer.AutoFlush = false;
 		writer.NewLine = "\n";
