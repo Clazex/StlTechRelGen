@@ -124,7 +124,13 @@ internal static class Inquiries {
 
 		// Game
 
-		config.Game.GamePath = Path.GetFullPath(Ask<string>(Messages.Prompt.AskGamePath));
+		TextPrompt<string> promptGamePath = new(Messages.Prompt.AskGamePath);
+		if (GameFinder.Find() is string foundPath) {
+			promptGamePath.DefaultValue(foundPath);
+		}
+
+		config.Game.GamePath = Path.GetFullPath(Prompt(promptGamePath));
+
 		if (Constants.DefaultDocumentPath is string defaultDocumentPath) {
 			string defaultPath = Path.GetFullPath(defaultDocumentPath);
 

@@ -23,6 +23,24 @@
         "resolved": "10.1.301",
         "contentHash": "excLf2zM/qUB3WhRUfI0xvOOaPwcRAEdYT/BXe9eiTKySnWVuIKMQTf5+6ETy5nsb1dpLp1s2j2yAM/XcRgFMg=="
       },
+      "GameFinder": {
+        "type": "Direct",
+        "requested": "[4.9.0, )",
+        "resolved": "4.9.0",
+        "contentHash": "xMt2OExT1LvA0iBrSJ/PkVToENNSo3E94cMb+O8nf5AYhAcOhRLZJ02L6E4BkbTPc7A5ZTjAJoPErisllH1AmA==",
+        "dependencies": {
+          "GameFinder.Common": "4.9.0",
+          "GameFinder.Launcher.Heroic": "4.9.0",
+          "GameFinder.RegistryUtils": "4.9.0",
+          "GameFinder.StoreHandlers.EADesktop": "4.9.0",
+          "GameFinder.StoreHandlers.EGS": "4.9.0",
+          "GameFinder.StoreHandlers.GOG": "4.9.0",
+          "GameFinder.StoreHandlers.Origin": "4.9.0",
+          "GameFinder.StoreHandlers.Steam": "4.9.0",
+          "GameFinder.StoreHandlers.Xbox": "4.9.0",
+          "GameFinder.Wine": "4.9.0"
+        }
+      },
       "Microsoft.EntityFrameworkCore.Design": {
         "type": "Direct",
         "requested": "[10.0.9, )",
@@ -60,9 +78,9 @@
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[10.0.3, )",
-        "resolved": "10.0.3",
-        "contentHash": "0B6nZyCHWXnvmlB559oduOspVdNOnpNXPjhpWVMovLPAsDVG7A4jJR9rzECf67JUzxP8/ee/wA8clwIzJcWNFA=="
+        "requested": "[10.0.9, )",
+        "resolved": "10.0.9",
+        "contentHash": "4Iw41e2h7I4t70SJcX2GCmbyKJIlA273Cfm9RJMM050/3VBejGAG1KcthP5Z2L6SQcbfbf6BhNWO26+ZG+GzMg=="
       },
       "SourceGear.sqlite3": {
         "type": "Direct",
@@ -114,6 +132,14 @@
         "resolved": "3.1.3",
         "contentHash": "hOfHw7MLJw/tbXaFwR1oiDb+dIXDp8URTxp5Pco42OOhiw77wrUNx6v6syNygHZbWwYdXQocL2Mo1l5FnfDVjg=="
       },
+      "FluentResults": {
+        "type": "Transitive",
+        "resolved": "3.15.2",
+        "contentHash": "yR3PD1SWKirYNpQ/t9TjJrsp1adazMmozLDPeamvSIljLAIjS0EQyyGvoupWsbZEryqW9SHbKXVL8YaJwURk8w==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.1"
+        }
+      },
       "FParsec": {
         "type": "Transitive",
         "resolved": "1.0.4-RC3",
@@ -143,6 +169,102 @@
         "type": "Transitive",
         "resolved": "2.0.0",
         "contentHash": "/+AgFH66lj/iyMB0z+R2zIoX7pGLs/pqAC9+4P9mo+PxPguxlIoVe536OMNDp9C7tWR1CMUNc3J6+Oly6S2g0w=="
+      },
+      "GameFinder.Common": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "bZsWx9VrMvsu5PtVLOTNAVAYrW3idOmWrbyZaZ7q2+htBafHEDtYtaBg6/roICLdrjT2VxffC4oSkSjdUFLvRw==",
+        "dependencies": {
+          "FluentResults": "3.15.2",
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.4",
+          "NexusMods.Paths": "0.19.1",
+          "OneOf": "3.0.271"
+        }
+      },
+      "GameFinder.Launcher.Heroic": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "+tmpDI9/SEADmJXFha9GdERiH41tB56GhZ9Jk442STwGcazR5j7xFM+6TsyLmsU6TXVjCgr02wYopU1VFU5ihg==",
+        "dependencies": {
+          "GameFinder.StoreHandlers.GOG": "4.9.0",
+          "GameFinder.Wine": "4.9.0"
+        }
+      },
+      "GameFinder.RegistryUtils": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "kNUPphnCie0Eqb4Ly045YocMAmfVDYtXI5Z6pODXV/lumRKmGnZOoEOn+oViNfY/k/DJnBNKg2N4oYsaXeWrEA=="
+      },
+      "GameFinder.StoreHandlers.EADesktop": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "6aRAXVHYwUXlPXJfO8q357DTK6iQHt7SXwjcASDne/UwXj9ADRMkNQpVZKh+jzmPwdjMpOtmMrCT4/3ExHX9zQ==",
+        "dependencies": {
+          "GameFinder.Common": "4.9.0",
+          "SHA3.Net": "2.0.0",
+          "System.Management": "8.0.0",
+          "TransparentValueObjects.Abstractions": "1.1.0"
+        }
+      },
+      "GameFinder.StoreHandlers.EGS": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "1FXsUw8+SLX12LyM/8Krl1f2eIhGmaFwzqIB0FnxR+a350MP/u9tQ739cLTJCCd/OHJ98Uidww09l4gJHRX+Kg==",
+        "dependencies": {
+          "GameFinder.Common": "4.9.0",
+          "GameFinder.RegistryUtils": "4.9.0",
+          "TransparentValueObjects.Abstractions": "1.1.0"
+        }
+      },
+      "GameFinder.StoreHandlers.GOG": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "J1nP4AkTjwsTgJhSLM5O9wV0T9bKt0BUqrMuoYlx1R+Cbco/I2/5pd9ijYOnVaGqxdih/iIHDDGnaI9OYBU6+A==",
+        "dependencies": {
+          "GameFinder.Common": "4.9.0",
+          "GameFinder.RegistryUtils": "4.9.0",
+          "TransparentValueObjects.Abstractions": "1.1.0"
+        }
+      },
+      "GameFinder.StoreHandlers.Origin": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "Obu6VOgvsJTsb7rXlVE3JEAcHJ/mt5s/kE++r2rkvkIyZzkzBQmeOvT9fPgXw2gAs6TLdw14op4c8Gb6/KIbzQ==",
+        "dependencies": {
+          "GameFinder.Common": "4.9.0",
+          "GameFinder.RegistryUtils": "4.9.0",
+          "TransparentValueObjects.Abstractions": "1.1.0"
+        }
+      },
+      "GameFinder.StoreHandlers.Steam": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "KTNII5mQsPHEVhqfIsvbG3t1AvCvmIgJQkFd2J3AP+84qZQAiPhl17DRDyt3kgJuesvK906jMzOpt6ypjRZECQ==",
+        "dependencies": {
+          "GameFinder.Common": "4.9.0",
+          "GameFinder.RegistryUtils": "4.9.0",
+          "GameFinder.Wine": "4.9.0",
+          "TransparentValueObjects.Abstractions": "1.1.0",
+          "ValveKeyValue": "0.13.1.398"
+        }
+      },
+      "GameFinder.StoreHandlers.Xbox": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "OzDIT1r9xD2fxmyUMxww/Oz9Ex182UVQquq0gU90njzJy3OKfsLk8uPuXm6i2Tr7xhfoLzg4wozP8R1nyEFrNw==",
+        "dependencies": {
+          "GameFinder.Common": "4.9.0",
+          "TransparentValueObjects.Abstractions": "1.1.0"
+        }
+      },
+      "GameFinder.Wine": {
+        "type": "Transitive",
+        "resolved": "4.9.0",
+        "contentHash": "LlqnxPuot8gi6ay0qUgBD9TeiRIY0P8BIVzOgxIP+Ti/Wbd4HHq22yieP2aLOUkugXeArGTOYp+1ykjNgtjqZw==",
+        "dependencies": {
+          "GameFinder.Common": "4.9.0",
+          "GameFinder.RegistryUtils": "4.9.0"
+        }
       },
       "Humanizer.Core": {
         "type": "Transitive",
@@ -368,10 +490,35 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
+      "NexusMods.Paths": {
+        "type": "Transitive",
+        "resolved": "0.19.1",
+        "contentHash": "eXfgHMv9/UfeBgrzx1GovOUBtp4dsJVP39JhylngcQw4psJWGO1HeWycf5bo2g0BcRLiji3YTCOtVeYpty8Q3w==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.2",
+          "Reloaded.Memory": "9.4.2",
+          "TransparentValueObjects.Abstractions": "1.1.0"
+        }
+      },
+      "OneOf": {
+        "type": "Transitive",
+        "resolved": "3.0.271",
+        "contentHash": "pqpqeK8xQGggExhr4tesVgJkjdn+9HQAO0QgrYV2hFjE3y90okzk1kQMntMiUOGfV7FrCUfKPaVvPBD4IANqKg=="
+      },
+      "Reloaded.Memory": {
+        "type": "Transitive",
+        "resolved": "9.4.2",
+        "contentHash": "yrjimngdXs7evlk/ZFbzP0uppTf0Og+LFFonITgpzZ94HmVOi8b+29YFfYdWTbf68qUzGP0D4s0VsMhaGerg5g=="
+      },
       "Sandwych.QuickGraph.Core": {
         "type": "Transitive",
         "resolved": "1.0.0",
         "contentHash": "OJEAm5kik+51yBaDfDuSD9+bx3dI23IvcfFcSL+H6v/YfAYtHbiMkAn5aOljNlkHSig3uakMRGhCTYr3lDKrEA=="
+      },
+      "SHA3.Net": {
+        "type": "Transitive",
+        "resolved": "2.0.0",
+        "contentHash": "ryLRgwVNnWLNW8fkl1qfr13eBkNhiRl2dPIksfEgcQghxrOt21PAEBxg/ofwW2l0FKanYpWT9WzD27O3PGHqpw=="
       },
       "Spectre.Console.Ansi": {
         "type": "Transitive",
@@ -393,8 +540,8 @@
       },
       "System.CodeDom": {
         "type": "Transitive",
-        "resolved": "6.0.0",
-        "contentHash": "CPc6tWO1LAer3IzfZufDBRL+UZQcj5uS207NHALQzP84Vp/z6wF0Aa0YZImOQY8iStY0A2zI/e3ihKNPfUm8XA=="
+        "resolved": "8.0.0",
+        "contentHash": "WTlRjL6KWIMr/pAaq3rYqh0TJlzpouaQ/W1eelssHgtlwHAH25jXTkUphTYx9HaIIf7XA6qs/0+YhtLEQRkJ+Q=="
       },
       "System.Composition": {
         "type": "Transitive",
@@ -444,10 +591,44 @@
           "System.Composition.Runtime": "9.0.0"
         }
       },
+      "System.Management": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "jrK22i5LRzxZCfGb+tGmke2VH7oE0DvcDlJ1HAKYU8cPmD8XnpUT0bYn2Gy98GEhGjtfbR/sxKTVb+dE770pfA==",
+        "dependencies": {
+          "System.CodeDom": "8.0.0"
+        }
+      },
+      "TransparentValueObjects.Abstractions": {
+        "type": "Transitive",
+        "resolved": "1.1.0",
+        "contentHash": "t3aNn6UhA2NO9uLAfBafHklhgVEuh9AxtrGZp9AdUTeDea84LCvea9W6IhjSQVkUuhuDIZ482kKzuwyVSuf+Rw=="
+      },
+      "ValveKeyValue": {
+        "type": "Transitive",
+        "resolved": "0.13.1.398",
+        "contentHash": "Cm9fOJZ5Meb7uFON2XtvO2oiw/2hxAnkXI+5enms0AGNRZu5vPhw1PF5H1B2W8SbRZxqE/hkzMkWdIOO0MGPzg=="
+      },
       "VDS.Common": {
         "type": "Transitive",
         "resolved": "2.0.0",
         "contentHash": "ogBkGWAZl4We1zBivoHcE41BM0ovlJ8OKwUhBDi+4aKoxWeUTtihdt9RZh4N2Y532e364vt4YgWiyq9Ne4KCZA=="
+      }
+    },
+    "net10.0/win-x64": {
+      "SourceGear.sqlite3": {
+        "type": "Direct",
+        "requested": "[3.50.4.5, )",
+        "resolved": "3.50.4.5",
+        "contentHash": "UtnipXhJYZKQOQIfpws/msLK7IRhMplE1CZCaZLIQXRnGD474QVpO/J9nMlQQY8NZueGz1aidjoxDRnrC1NT3Q=="
+      },
+      "System.Management": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "jrK22i5LRzxZCfGb+tGmke2VH7oE0DvcDlJ1HAKYU8cPmD8XnpUT0bYn2Gy98GEhGjtfbR/sxKTVb+dE770pfA==",
+        "dependencies": {
+          "System.CodeDom": "8.0.0"
+        }
       }
     }
   }
