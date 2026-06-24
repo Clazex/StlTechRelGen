@@ -2,7 +2,7 @@ using StlTechRelGen.Model;
 
 namespace StlTechRelGen;
 
-internal sealed class L11nBuilder(GameData gameData) {
+internal sealed class L10nBuilder(GameData gameData) {
 	public Dictionary<string, Dictionary<string, string>> Generated { get; } = LangHelpers.allSTLLangs.ToDictionary(
 		i => i.Name(),
 		_ => new Dictionary<string, string>()
@@ -12,31 +12,31 @@ internal sealed class L11nBuilder(GameData gameData) {
 		StringBuilder sb = new(); // Holds metadata except areas, plus related techs
 
 		if (tech.Dangerous) {
-			sb.Append(Constants.L11n.Sep).Append(Constants.L11n.Dangerous);
+			sb.Append(Constants.L10n.Sep).Append(Constants.L10n.Dangerous);
 		}
 
 		if (tech.Rare) {
-			sb.Append(Constants.L11n.Sep).Append(Constants.L11n.Rare);
+			sb.Append(Constants.L10n.Sep).Append(Constants.L10n.Rare);
 		}
 
 		if (tech.Levels != 1) {
-			sb.Append(Constants.L11n.Sep).Append(Constants.L11n.Repeatable);
+			sb.Append(Constants.L10n.Sep).Append(Constants.L10n.Repeatable);
 			if (tech.Levels != -1) {
-				sb.Append(Constants.L11n.Times)
+				sb.Append(Constants.L10n.Times)
 					.Append(tech.Levels);
 			}
 		}
 
-		sb.Append(CultureInfo.InvariantCulture, $"{Constants.L11n.RParen}§!");
+		sb.Append(CultureInfo.InvariantCulture, $"{Constants.L10n.RParen}§!");
 
 
 		if (tech.Requires.Count > 0) {
-			sb.Append($"\n\n{Constants.L11n.Requires}");
+			sb.Append($"\n\n{Constants.L10n.Requires}");
 			foreach (TechRequirement require in tech.Requires) {
 				if (require is TechRequirementSingle single) {
 					WriteRelatedTech(sb, single.Id, 1);
 				} else if (require is TechRequirementAlternatives alternatives) {
-					sb.Append(CultureInfo.InvariantCulture, $"\n$t${Constants.L11n.Bullet}{Constants.L11n.OneOf}");
+					sb.Append(CultureInfo.InvariantCulture, $"\n$t${Constants.L10n.Bullet}{Constants.L10n.OneOf}");
 					foreach (string alternative in alternatives.Alternatives) {
 						WriteRelatedTech(sb, alternative, 2);
 					}
@@ -47,7 +47,7 @@ internal sealed class L11nBuilder(GameData gameData) {
 		}
 
 		if (tech.Unlocks.Count > 0) {
-			sb.Append($"\n\n{Constants.L11n.Unlocks}");
+			sb.Append($"\n\n{Constants.L10n.Unlocks}");
 			foreach (string unlock in tech.Unlocks) {
 				WriteRelatedTech(sb, unlock, 1);
 			}
@@ -60,8 +60,8 @@ internal sealed class L11nBuilder(GameData gameData) {
 			// Some metadata might be changed by swaps, generate individual copies for each swap
 			string contentSwap = $"\n\n£{swapTech.Area.ToString().ToLowerInvariant()}£"
 				+ $" §Y${swapTech.Area.ToString().ToUpperInvariant()}$ "
-				+ $"T{tech.Tier}{Constants.L11n.LParen}"
-				+ swapTech.Categories.Select(i => $"${i.ToLowerInvariant()}$").Join(Constants.L11n.Sep)
+				+ $"T{tech.Tier}{Constants.L10n.LParen}"
+				+ swapTech.Categories.Select(i => $"${i.ToLowerInvariant()}$").Join(Constants.L10n.Sep)
 				+ contentMain; // Add up with metadata that are affected by swaps
 
 			foreach ((CWLang lang, ReadOnlyDictionary<string, string> loc) in gameData.Localizations) {
@@ -133,9 +133,9 @@ internal sealed class L11nBuilder(GameData gameData) {
 
 		sb.Append('$');
 
-		sb.Append(Constants.L11n.Bullet);
+		sb.Append(Constants.L10n.Bullet);
 		if (!tech.Vanilla) {
-			sb.Append(Constants.L11n.Mod);
+			sb.Append(Constants.L10n.Mod);
 		}
 
 		sb.Append(CultureInfo.InvariantCulture, $"£{tech.Area.ToString().ToLowerInvariant()}£ ['technology:{relTechId}']");

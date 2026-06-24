@@ -64,27 +64,27 @@ public static class Program {
 		Inquiries.WaitForLauncherClose(config);
 
 		(string destPath, Mod[] mods) = await GetTarget(config);
-		DirectoryInfo l11nDir = new(Path.Combine(destPath, "localisation"));
-		PrepareOutputDir(l11nDir);
+		DirectoryInfo l10nDir = new(Path.Combine(destPath, "localisation"));
+		PrepareOutputDir(l10nDir);
 
-		(int countL11nFiles, int countTechs, int countRelations) = await AnsiConsole
+		(int countL10nFiles, int countTechs, int countRelations) = await AnsiConsole
 			.Progress()
 			.UsePreset()
 			.StartAsync(async (ctx) => {
 				GameData gameData = LoadGameData(ctx, config, mods);
-				L11nBuilder l11nBuilder = BuildL11n(ctx, gameData);
-				WriteL11nFragments(ctx, l11nDir);
-				l11nBuilder.WriteFilesWithProgress(ctx, l11nDir.CreateSubdirectory("replace").FullName);
+				L10nBuilder l10nBuilder = BuildL10n(ctx, gameData);
+				WriteL10nFragments(ctx, l10nDir);
+				l10nBuilder.WriteFilesWithProgress(ctx, l10nDir.CreateSubdirectory("replace").FullName);
 
 				return (
-					l11nBuilder.Generated.Keys.Count,
+					l10nBuilder.Generated.Keys.Count,
 					gameData.TechTable.Techs.Count,
 					// On Requires side we'll need to deal with alternatives
 					gameData.TechTable.Techs.Values.Sum(i => i.Unlocks.Count) * 2
 				);
 			});
 
-		AnsiConsole.MarkupLine(Messages.Prompt.SavedLocalization.Format(countL11nFiles, l11nDir.FullName));
+		AnsiConsole.MarkupLine(Messages.Prompt.SavedLocalization.Format(countL10nFiles, l10nDir.FullName));
 		AnsiConsole.MarkupLine(Messages.Prompt.GenerationSummary.Format(countRelations, countTechs));
 		if (!config.Yesmen) {
 			Inquiries.Pause();
@@ -110,15 +110,15 @@ public static class Program {
 	private static GameData LoadGameData(ProgressContext ctx, Config config, Mod[] sourceMods) =>
 		GameData.LoadWithProgress(ctx, config, sourceMods.Select(i => (i.DisplayName!, i.Path())));
 
-	private static L11nBuilder BuildL11n(ProgressContext ctx, GameData gameData) {
-		L11nBuilder l11nBuilder = new(gameData);
+	private static L10nBuilder BuildL10n(ProgressContext ctx, GameData gameData) {
+		L10nBuilder l10nBuilder = new(gameData);
 		gameData.TechTable.Techs
 			.DriveProgressTask(ctx.AddTask(Messages.Progress.GeneratingLocalization))
-			.ForEach(i => l11nBuilder.BuildTech(i.Key, i.Value));
-		return l11nBuilder;
+			.ForEach(i => l10nBuilder.BuildTech(i.Key, i.Value));
+		return l10nBuilder;
 	}
 
-	private static void WriteL11nFragments(ProgressContext ctx, DirectoryInfo outputDirectory) {
+	private static void WriteL10nFragments(ProgressContext ctx, DirectoryInfo outputDirectory) {
 		const string fragmentPrefix = $"{nameof(StlTechRelGen)}.Resources.fragments.";
 		Assembly assembly = Assembly.GetExecutingAssembly();
 

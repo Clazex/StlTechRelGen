@@ -36,7 +36,7 @@ loading_technologies = "Loading technologies"
 building_tech_relationship = "Building tech relationship"
 loading_localization = "Loading localization"
 generating_localization = "Generating localization"
-writing_localization_fragments = "Writing l11n fragments"
+writing_localization_fragments = "Writing l10n fragments"
 writing_localization = "Writing localization"
 
 [data]

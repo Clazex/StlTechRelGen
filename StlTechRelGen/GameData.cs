@@ -157,12 +157,12 @@ internal sealed class GameData {
 		.AsReadOnly();
 
 	private void LoadLocalization(ProgressContext ctx) {
-		ConcurrentDictionary<CWTools.Common.Lang, ReadOnlyDictionary<string, string>> L11n = new();
+		ConcurrentDictionary<CWTools.Common.Lang, ReadOnlyDictionary<string, string>> L10n = new();
 		ProgressTask task = ctx.AddTask(Messages.Progress.LoadingLocalization)
 			.MaxValue(Game.LocalisationManager.LocalisationEntries().Length);
 
 		Parallel.ForEach(Game.LocalisationManager.LocalisationEntries(), (x) => {
-			L11n[x.Item1] = x.Item2.ToSortedList((x, y) => Comparer.Compare(x.Item2, y.Item2))
+			L10n[x.Item1] = x.Item2.ToSortedList((x, y) => Comparer.Compare(x.Item2, y.Item2))
 				.ToDictionaryOverwriting(
 					i => i.Item1,
 					i => {
@@ -185,6 +185,6 @@ internal sealed class GameData {
 		});
 
 		task.StopTask();
-		Localizations = L11n.AsReadOnly();
+		Localizations = L10n.AsReadOnly();
 	}
 }

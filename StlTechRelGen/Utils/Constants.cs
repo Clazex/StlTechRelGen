@@ -29,7 +29,7 @@ internal static class Constants {
 	public static string GameDirName { get; } = "stellaris";
 
 
-	public static class L11n {
+	public static class L10n {
 		public const string Repeatable = "$techrel_repeatable$";
 		public const string Requires = "$techrel_requires$";
 		public const string Unlocks = "$techrel_unlocks$";
