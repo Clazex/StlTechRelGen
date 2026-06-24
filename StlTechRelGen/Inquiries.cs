@@ -12,6 +12,8 @@ using static StlTechRelGen.Lang;
 namespace StlTechRelGen;
 
 internal static class Inquiries {
+	private const string LAUNCHER_PROC_NAME = "paradox launcher";
+
 	// Workaround for collision between class Spectre.Console.Markup and method Spectre.Console.AnsiConsole.Markup
 	private static string Escape(string text) => Spectre.Console.Markup.Escape(text);
 
@@ -22,26 +24,20 @@ internal static class Inquiries {
 		WriteLine();
 	}
 
-	public static async Task<T> ProgressRunAsync<T>(string desc, Func<T> func) => await Progress()
+	public static async Task<T> RunWithProgressAsync<T>(string desc, Func<T> func) => await Progress()
 		.UsePreset()
-		.StartAsync(async (ctx) => ProgressRun(ctx, desc, func));
+		.StartAsync(async (ctx) => RunWithProgress(ctx, desc, func));
 
-	public static void ProgressRun(ProgressContext ctx, string desc, Action func) {
-		ProgressTask task = ctx.AddTask(desc).IsIndeterminate().MaxValue(1);
-		func();
-		task.Value(1).StopTask();
-	}
-
-	public static T ProgressRun<T>(ProgressContext ctx, string desc, Func<T> func) {
+	public static T RunWithProgress<T>(ProgressContext ctx, string desc, Func<T> func) {
 		ProgressTask task = ctx.AddTask(desc).IsIndeterminate().MaxValue(1);
 		T result = func();
 		task.Value(1).StopTask();
 		return result;
 	}
 
-	internal static void PromptCloseLauncher(Config config) {
+	internal static void WaitForLauncherClose(Config config) {
 		static bool IsLauncherOpen() => Process.GetProcesses()
-			.Any(i => i.ProcessName.Equals("paradox launcher", StringComparison.OrdinalIgnoreCase));
+			.Any(i => i.ProcessName.Equals(LAUNCHER_PROC_NAME, StringComparison.OrdinalIgnoreCase));
 
 		if (IsLauncherOpen()) {
 			MarkupLine(Messages.Prompt.CloseLauncher);
@@ -58,7 +54,7 @@ internal static class Inquiries {
 		} while (IsLauncherOpen());
 	}
 
-	internal static bool ConfirmUseSavedTarget(Config config) {
+	internal static bool ConfirmUseSavedSelection(Config config) {
 		if (config.Yesmen) {
 			return true;
 		}
@@ -73,7 +69,29 @@ internal static class Inquiries {
 		);
 	}
 
-	internal static Playset ChoosePlayset(LauncherV2DbContext db) => Prompt(new SelectionPrompt<Playset>()
+	internal static (string destPath, Mod[] mods) SelectOutputTarget(Config config, LauncherV2DbContext db) {
+		List<Mod> mods;
+		string destPath;
+
+		Playset playset = SelectPlayset(db);
+		if (string.IsNullOrEmpty(playset.Name)) {
+			destPath = PromptOutputPath();
+			mods = [];
+			SaveTargetIfConfirmed(config, playset.Name, destPath);
+			return (destPath, [.. mods]);
+		}
+
+		mods = [.. db.GetModsInPlayset(playset)];
+
+		Mod targetMod = SelectTargetMod(mods);
+		mods.Remove(targetMod);
+		destPath = targetMod.Path();
+
+		SaveTargetIfConfirmed(config, playset.Name, targetMod.DisplayName!);
+		return (destPath, [.. mods]);
+	}
+
+	private static Playset SelectPlayset(LauncherV2DbContext db) => Prompt(new SelectionPrompt<Playset>()
 		.UsePreset()
 		.Title(Messages.Prompt.ChoosePlayset)
 		.AddChoices(db.Playsets.OrderByDescending(i => i.IsActive))
@@ -84,19 +102,19 @@ internal static class Inquiries {
 		)
 	);
 
-	internal static string AskOutputPath() =>
+	internal static string PromptOutputPath() =>
 		Path.GetFullPath(Ask<string>(Messages.Prompt.AskOutputPath));
 
-	internal static Mod ChooseTargetMod(IEnumerable<Mod> mods) => Prompt(new SelectionPrompt<Mod>()
+	internal static Mod SelectTargetMod(IEnumerable<Mod> mods) => Prompt(new SelectionPrompt<Mod>()
 		.UsePreset()
 		.Title(Messages.Prompt.ChooseTargetMod)
 		.AddChoices(mods)
 		.PageSize(8)
 		.EnableSearch()
-		.UseConverter(i => $"[white]{Escape(i.DisplayName!)}[/] [dim]({Escape(i.Path())}[/])")
+		.UseConverter(i => $"[white]{Escape(i.DisplayName!)}[/] [dim]({Escape(i.Path())})[/]")
 	);
 
-	internal static void PromptSaveTarget(Config config, string playsetName, string targetModName) {
+	internal static void SaveTargetIfConfirmed(Config config, string playsetName, string targetModName) {
 		if (!config.Yesmen && !Confirm((
 			string.IsNullOrEmpty(playsetName)
 				? Messages.Prompt.ConfirmSaveVanilla
@@ -116,7 +134,7 @@ internal static class Inquiries {
 		config.Save();
 	}
 
-	internal static Config ConfigTour() {
+	internal static Config RunSetupWizard() {
 		MarkupLine(Messages.Prompt.Welcome);
 		MarkupLine(Messages.Prompt.ReadInstructions);
 		Pause();

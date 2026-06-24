@@ -6,8 +6,8 @@ using StlTechRelGen.Utils;
 
 namespace StlTechRelGen;
 
-internal sealed class CliCommand : Command<CliCommand.CliArguments> {
-	internal sealed class CliArguments : CommandSettings {
+internal sealed class CliCommand : Command<CliCommand.Settings> {
+	internal sealed class Settings : CommandSettings {
 		[CommandOption("-g|--game-path", isRequired: true)]
 		[Description("Path to the game")]
 		public required string GamePath { get; init; }
@@ -45,10 +45,10 @@ internal sealed class CliCommand : Command<CliCommand.CliArguments> {
 		};
 	}
 
-	internal static CliArguments? Arguments { get; private set; }
+	internal static Settings? Arguments { get; private set; }
 
 	// We only utilize argument parsing feature here
-	protected override int Execute(CommandContext context, CliArguments arguments, CancellationToken cancellationToken) {
+	protected override int Execute(CommandContext context, Settings arguments, CancellationToken cancellationToken) {
 		Arguments = arguments;
 		return 0;
 	}

@@ -97,5 +97,6 @@ internal sealed class Lang {
 		public required string PlaysetNotFound { get; init; }
 		public required string TargetModNotFound { get; init; }
 		public required string MultipleModsSameName { get; init; }
+		public required CompositeFormat FailedToAccessOutputDir { get; init; }
 	}
 }

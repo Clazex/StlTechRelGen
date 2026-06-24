@@ -18,89 +18,72 @@ namespace StlTechRelGen;
 public static class Program {
 	public static async Task Main(string[] args) {
 		try {
-			// Add support for codepage 1252, used by CWTools
-			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-			// Initialize SQLitePCL using the packages:
-			// SQLitePCLRaw.config.e_sqlite3 (glue) + SourceGear.sqlite3 (binary).
-			SQLitePCL.Batteries_V2.Init();
-
-			Config config;
-			if (args.Length > 0) {
-				CommandApp<CliCommand> app = new();
-				app.Configure(config =>
-					config.UseAssemblyInformationalVersion()
-				);
-				app.Run(args);
-
-				if (CliCommand.Arguments == null) {
-					// Main command was not invoked, e.g. -h or -v was used
-					return;
-				}
-
-				config = CliCommand.Arguments.ToConfig();
-			} else {
-				config = Config.Load() ?? Inquiries.ConfigTour();
-				config.Save(); // Roundtrip to format, or save newly created
-			}
-
-			await Run(config);
+			Initialize();
+			Config config = ResolveConfig(args);
+			await Execute(config);
 		} catch (Exception e) {
 			AnsiConsole.WriteException(e);
 		}
 	}
 
-	private static async Task Run(Config config) {
+	private static void Initialize() {
+		// Add support for codepage 1252, used by CWTools
+		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+		// Initialize SQLitePCL using the packages:
+		// SQLitePCLRaw.config.e_sqlite3 (glue) + SourceGear.sqlite3 (binary).
+		SQLitePCL.Batteries_V2.Init();
+	}
+
+	private static Config ResolveConfig(string[] args) {
+		if (args.Length == 0) {
+			Config config = Config.Load() ?? Inquiries.RunSetupWizard();
+			config.Save(); // Roundtrip to format, or save newly created
+			return config;
+		}
+
+		CommandApp<CliCommand> app = new();
+		app.Configure(config =>
+			config.UseAssemblyInformationalVersion()
+		);
+		app.Run(args);
+
+		if (CliCommand.Arguments is not CliCommand.Settings arguments) {
+			// Main command was not invoked, e.g. -h or -v was used
+			Environment.Exit(0);
+			return null; // Unreachable
+		} else {
+			return arguments.ToConfig();
+		}
+	}
+
+	private static async Task Execute(Config config) {
+		UpdateChecker? updateChecker = config.Update.CheckUpdate
+			? new UpdateChecker(config.Update) : null;
+
 		if (config.OverrideLanguage != null) {
 			LoadMessages(config.OverrideLanguage);
 		}
-
-		UpdateChecker? updateChecker = config.Update.CheckUpdate ? new UpdateChecker(config.Update) : null;
 
 		if (config.SuppressesCWToolsErrors) {
 			// Normally there will be two lines of error complaining missing rule files
 			CWTools.Utilities.Utils.logError = FuncConvert.FromAction((string _) => { });
 		}
 
-		Inquiries.PromptCloseLauncher(config);
+		Inquiries.WaitForLauncherClose(config);
 
-		(string outPath, Mod[] mods) = await GetModsSelection(config);
-		DirectoryInfo outDir = new(Path.Combine(outPath, "localisation"));
+		(string destPath, Mod[] mods) = await GetTarget(config);
+		DirectoryInfo l11nDir = new(Path.Combine(destPath, "localisation"));
+		PrepareOutputDir(l11nDir);
 
-		try {
-			outDir.Delete(true);
-		} catch (DirectoryNotFoundException) {
-		}
-
-		outDir.Create();
-
-		(int countLocFiles, int countTechs, int countRelations) = await AnsiConsole
+		(int countL11nFiles, int countTechs, int countRelations) = await AnsiConsole
 			.Progress()
 			.UsePreset()
 			.StartAsync(async (ctx) => {
-				GameData gameData = GameData.LoadWithProgress(ctx, config,
-					mods.Select(i => (i.DisplayName!, i.Path()))
-				);
-
-				L11nBuilder l11nBuilder = new(gameData);
-				gameData.TechTable.Techs
-					.DriveProgressTask(ctx.AddTask(Messages.Progress.GeneratingLocalization))
-					.ForEach(i => l11nBuilder.BuildTech(i.Key, i.Value));
-
-				Assembly assembly = Assembly.GetExecutingAssembly();
-				const string fragmentPrefix = $"{nameof(StlTechRelGen)}.Resources.fragments.";
-				assembly
-					.GetManifestResourceNames()
-					.Where(i => i.StartsWith(fragmentPrefix, StringComparison.Ordinal))
-					.DriveProgressTask(ctx.AddTask(Messages.Progress.WritingLocalizationFragments))
-					.Select(i => i[fragmentPrefix.Length..])
-					.ForEach(i => {
-						using Stream stream = assembly.GetManifestResourceStream(fragmentPrefix + i)!;
-						using FileStream file = File.Open(Path.Combine(outDir.FullName, i), GlobalInstances.FileWriteOptions);
-						stream.CopyTo(file);
-					});
-
-				l11nBuilder.WriteFilesWithProgress(ctx, outDir.CreateSubdirectory("replace").FullName);
+				GameData gameData = LoadGameData(ctx, config, mods);
+				L11nBuilder l11nBuilder = BuildL11n(ctx, gameData);
+				WriteL11nFragments(ctx, l11nDir);
+				l11nBuilder.WriteFilesWithProgress(ctx, l11nDir.CreateSubdirectory("replace").FullName);
 
 				return (
 					l11nBuilder.Generated.Keys.Count,
@@ -110,7 +93,7 @@ public static class Program {
 				);
 			});
 
-		AnsiConsole.MarkupLine(Messages.Prompt.SavedLocalization.Format(countLocFiles, outDir.FullName));
+		AnsiConsole.MarkupLine(Messages.Prompt.SavedLocalization.Format(countL11nFiles, l11nDir.FullName));
 		AnsiConsole.MarkupLine(Messages.Prompt.GenerationSummary.Format(countRelations, countTechs));
 		if (!config.Yesmen) {
 			Inquiries.Pause();
@@ -119,48 +102,75 @@ public static class Program {
 		updateChecker?.TryReport();
 	}
 
-	private static async Task<(string destPath, Mod[] mods)> GetModsSelection(Config config) {
-		using LauncherV2DbContext db = await Inquiries.ProgressRunAsync(Messages.Progress.ConnectingLauncherDb,
+
+	private static void PrepareOutputDir(DirectoryInfo outputDirectory) {
+		try {
+			if (outputDirectory.Exists) {
+				outputDirectory.Delete(true);
+			}
+
+			outputDirectory.Create();
+		} catch {
+			LogError(Messages.Error.FailedToAccessOutputDir.Format(outputDirectory.FullName));
+			throw;
+		}
+	}
+
+	private static GameData LoadGameData(ProgressContext ctx, Config config, Mod[] sourceMods) =>
+		GameData.LoadWithProgress(ctx, config, sourceMods.Select(i => (i.DisplayName!, i.Path())));
+
+	private static L11nBuilder BuildL11n(ProgressContext ctx, GameData gameData) {
+		L11nBuilder l11nBuilder = new(gameData);
+		gameData.TechTable.Techs
+			.DriveProgressTask(ctx.AddTask(Messages.Progress.GeneratingLocalization))
+			.ForEach(i => l11nBuilder.BuildTech(i.Key, i.Value));
+		return l11nBuilder;
+	}
+
+	private static void WriteL11nFragments(ProgressContext ctx, DirectoryInfo outputDirectory) {
+		const string fragmentPrefix = $"{nameof(StlTechRelGen)}.Resources.fragments.";
+		Assembly assembly = Assembly.GetExecutingAssembly();
+
+		assembly
+			.GetManifestResourceNames()
+			.Where(i => i.StartsWith(fragmentPrefix, StringComparison.Ordinal))
+			.DriveProgressTask(ctx.AddTask(Messages.Progress.WritingLocalizationFragments))
+			.Select(i => i[fragmentPrefix.Length..])
+			.ForEach(i => {
+				using Stream stream = assembly.GetManifestResourceStream(fragmentPrefix + i)!;
+				using FileStream file = File.Open(Path.Combine(outputDirectory.FullName, i), GlobalInstances.FileWriteOptions);
+				stream.CopyTo(file);
+			});
+	}
+
+	private static async Task<(string destPath, Mod[] sourceMods)> GetTarget(Config config) {
+		using LauncherV2DbContext db = await Inquiries.RunWithProgressAsync(Messages.Progress.ConnectingLauncherDb,
 			() => new LauncherV2DbContext(config.Game)
 		);
 
-		if (TryUseSavedPlaysetData(config, db, out string? outPath, out List<Mod>? mods)) {
-			return (outPath, [.. mods]);
+		if (TryRestoreSavedTarget(config, db, out string? destPath, out List<Mod>? mods)) {
+			return (destPath, [.. mods]);
 		}
 
-		Playset playset = Inquiries.ChoosePlayset(db);
-		if (string.IsNullOrEmpty(playset.Name)) {
-			outPath = Inquiries.AskOutputPath();
-			mods = [];
-			Inquiries.PromptSaveTarget(config, playset.Name, outPath);
-			return (outPath, [.. mods]);
-		}
-
-		mods = [.. db.GetModsInPlayset(playset)];
-
-		Mod targetMod = Inquiries.ChooseTargetMod(mods);
-		mods.Remove(targetMod);
-		outPath = Path.Combine(targetMod.Path());
-
-		Inquiries.PromptSaveTarget(config, playset.Name, targetMod.DisplayName!);
-		return (outPath, [.. mods]);
+		return Inquiries.SelectOutputTarget(config, db);
 	}
 
-	private static bool TryUseSavedPlaysetData(Config config, LauncherV2DbContext db, [NotNullWhen(true)] out string? outPath, [NotNullWhen(true)] out List<Mod>? mods) {
-		outPath = null;
+
+	private static bool TryRestoreSavedTarget(Config config, LauncherV2DbContext db, [NotNullWhen(true)] out string? destPath, [NotNullWhen(true)] out List<Mod>? mods) {
+		destPath = null;
 		mods = null;
 
 		if (config.Playset == null) {
 			return false;
 		}
 
-		if (!Inquiries.ConfirmUseSavedTarget(config)) {
+		if (!Inquiries.ConfirmUseSavedSelection(config)) {
 			return false;
 		}
 
 		// Vanilla game
 		if (string.IsNullOrEmpty(config.Playset.Name)) {
-			outPath = config.Playset.Target;
+			destPath = config.Playset.Target;
 			mods = [];
 			return true;
 		}
@@ -188,7 +198,7 @@ public static class Program {
 
 		Mod targetMod = targetModCandidates[0];
 		mods.Remove(targetMod);
-		outPath = Path.Combine(targetMod.Path());
+		destPath = Path.Combine(targetMod.Path());
 		return true;
 	}
 }

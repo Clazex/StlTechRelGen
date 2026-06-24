@@ -45,7 +45,7 @@ internal sealed class GameData {
 	public TechTable TechTable { get; private set; } = null!;
 	public ReadOnlyDictionary<CWTools.Common.Lang, ReadOnlyDictionary<string, string>> Localizations = null!;
 
-	private GameData(ProgressContext ctx, Config config, IEnumerable<(string name, string path)> mods) {
+	private GameData(Config config, IEnumerable<(string name, string path)> mods) {
 		string commonDir = Path.Combine(config.Game.GamePath, "common");
 
 		GameDir = new(
@@ -109,10 +109,10 @@ internal sealed class GameData {
 	}
 
 	public static GameData LoadWithProgress(ProgressContext ctx, Config config, IEnumerable<(string name, string path)> mods) {
-		GameData gameData = Inquiries.ProgressRun(
+		GameData gameData = Inquiries.RunWithProgress(
 			ctx,
 			Messages.Progress.LoadingGame,
-			() => new GameData(ctx, config, mods)
+			() => new GameData(config, mods)
 		);
 
 		Parallel.ForEach([
