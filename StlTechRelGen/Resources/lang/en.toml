@@ -9,10 +9,7 @@ read_instructions = "Make sure to [cyan]read instructions[/] carefully!"
 pause = "Press [cyan]Enter[/] to continue..."
 
 ask_game_path = "[white]What is your [cyan]game path[/]?[/]"
-inferred_document_path = "The inferred [cyan]document path[/] based on your OS is: [green]{0}[/]"
-confirm_document_path = "[white]Is this correct?[/]"
 ask_document_path = "[white]What is your [cyan]document path[/]?[/]"
-cannot_infer_document_path = "Cannot infer [cyan]document path[/] since your OS is unknown"
 config_created = "[green]Config successfully created![/]"
 
 close_launcher = "Please [cyan]close the launcher[/] before continuing"

@@ -47,10 +47,7 @@ internal sealed class Lang {
 		public required string Pause { get; init; }
 
 		public required string AskGamePath { get; init; }
-		public required CompositeFormat InferredDocumentPath { get; init; }
-		public required string ConfirmDocumentPath { get; init; }
 		public required string AskDocumentPath { get; init; }
-		public required string CannotInferDocumentPath { get; init; }
 		public required string ConfigCreated { get; init; }
 
 		public required string CloseLauncher { get; init; }

@@ -131,21 +131,12 @@ internal static class Inquiries {
 
 		config.Game.GamePath = Path.GetFullPath(Prompt(promptGamePath));
 
+		TextPrompt<string> promptDocumentPath = new(Messages.Prompt.AskDocumentPath);
 		if (Constants.DefaultDocumentPath is string defaultDocumentPath) {
-			string defaultPath = Path.GetFullPath(defaultDocumentPath);
-
-			MarkupLine(Messages.Prompt.InferredDocumentPath.Format(defaultDocumentPath));
-
-			config.Game.DocumentPath = Confirm(Messages.Prompt.ConfirmDocumentPath)
-				? defaultPath
-				: Path.GetFullPath(Prompt(
-					new TextPrompt<string>(Messages.Prompt.AskDocumentPath)
-						.DefaultValue(defaultPath)
-				));
-		} else {
-			MarkupLine(Messages.Prompt.CannotInferDocumentPath);
-			config.Game.DocumentPath = Path.GetFullPath(Ask<string>(Messages.Prompt.AskDocumentPath));
+			promptDocumentPath.DefaultValue(Path.GetFullPath(defaultDocumentPath));
 		}
+
+		config.Game.DocumentPath = Path.GetFullPath(Prompt(promptDocumentPath));
 
 		MarkupLine(Messages.Prompt.ConfigCreated);
 
