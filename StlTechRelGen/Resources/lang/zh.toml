@@ -44,6 +44,7 @@ localization_entry_not_found = "未找到科技 {0} 的本地化条目"
 localization_entry_and_swap_not_found = "未找到科技 {0} 与其替换科技 {1} 的本地化条目"
 tech_unknown_prereq = "科技 {0} 有未知的前置科技：{1}"
 tech_unnamed_swap = "科技 {0} 有未命名的替换科技，已跳过"
+localization_cycle_reference = "本地化键 \"{0}\" 中存在循环引用，已跳过解析以避免无限循环"
 
 [update]
 new_version_found = "[gold1]发现新版本！[link={0}]{1}[/]（{2:g}）[/]"

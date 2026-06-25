@@ -80,6 +80,7 @@ internal sealed class Lang {
 		public required CompositeFormat LocalizationEntryAndSwapNotFound { get; init; }
 		public required CompositeFormat TechUnknownPrereq { get; init; }
 		public required CompositeFormat TechUnnamedSwap { get; init; }
+		public required CompositeFormat LocalizationCycleReference { get; init; }
 	}
 
 	internal sealed class UpdateMessages {

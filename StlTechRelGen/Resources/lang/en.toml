@@ -44,6 +44,7 @@ localization_entry_not_found = "Localization entry of {0} not found"
 localization_entry_and_swap_not_found = "Localization entry of {0} and swap {1} not found"
 tech_unknown_prereq = "Tech {0} has unknown prereq: {1}"
 tech_unnamed_swap = "[red]Tech {0} has an unnamed swap, skipping it[/]"
+localization_cycle_reference = "Circular reference in loc key \"{0}\", skipping resolution to prevent infinite loop"
 
 [update]
 new_version_found = "[gold1]New version found! [link={0}]{1}[/] ({2:g})[/]"

@@ -27,10 +27,10 @@ internal static partial class GlobalInstances {
 	//   key    — full loc key inside $...$ (e.g. "tech_foo_desc_bar")
 	//   id     — tech identifier part (e.g. "tech_foo")
 	//   suffix — optional auth suffix (e.g. "_bar"); may not be present.
-	//            The .+ is greedy and will capture everything after _desc.
+	//            The .+? is non-greedy to match each reference individually.
 	[GeneratedRegex(
-		@"^\$(?<key>(?<id>.+)_desc(?<suffix>_.+)?)\$$",
-		RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant
+		@"\$(?<key>(?<id>.+?)_desc(?<suffix>_.+?)?)\$",
+		RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
 	)]
 	internal static partial Regex RegexLocReference();
 

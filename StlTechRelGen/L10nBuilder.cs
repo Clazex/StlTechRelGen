@@ -81,51 +81,53 @@ internal sealed class L10nBuilder(GameData gameData) {
 
 					// Currently use Swap desc w/ suffix => Orig desc w/o suffix fallback
 					// Not sure if this is correct and covers all cases
-					if (!loc.TryGetValue(descKeySwapFull, out string? descOrig)
-						&& !loc.TryGetValue(descKey, out descOrig)
-					) {
-						// Loc not found, use key directly
-						// We don't skip directly in order to provide info at best-effort
-						descOrig = descKeySwapFull;
+					string descKeyFinal = descKeySwapFull;
+					if (!loc.TryGetValue(descKeySwapFull, out string? descOrig)) {
+						descKeyFinal = descKey;
+						if (!loc.TryGetValue(descKey, out descOrig)) {
+							// Loc not found, use key directly
+							// We don't skip directly in order to provide info at best-effort
+							descOrig = descKeySwapFull;
 
-						if (descKey == descKeySwapFull) {
-							LogWarning(Messages.Data.LocalizationEntryNotFound.Format(descKey));
-						} else {
-							LogWarning(Messages.Data.LocalizationEntryAndSwapNotFound.Format(descKey, descKeySwapFull));
+							if (descKey == descKeySwapFull) {
+								LogWarning(Messages.Data.LocalizationEntryNotFound.Format(descKey));
+							} else {
+								LogWarning(Messages.Data.LocalizationEntryAndSwapNotFound.Format(descKey, descKeySwapFull));
+							}
 						}
 					}
 
-					// A tech description may reference another tech's description via loc keys.
-					// Without resolving these references, the output incorrectly nests the
-					// referenced tech's relation info inside the current tech's description:
-					//   [referenced tech's orig desc] + [referenced tech's relation info]
-					//   + [this tech's relation info]
-					// We resolve by replacing loc key references with the referenced tech's
-					// own original description (which doesn't include its relation info).
-					// Note: this changes loc behavior in edge cases (nested references).
-					// Unknown techs are left as-is; this is safe as long as generated loc
-					// is kept up-to-date.
-					string descFinal = GlobalInstances.RegexLocReference()
-						.Matches(descOrig)
-						// 1. Only resolve references to techs we actually know about
-						.Where(i => gameData.TechTable.AllTechIds.Contains(i.Groups["id"].Value))
-						// 2. Skip auth-suffixed references pointing to non-existing suffixes
-						.Where(i => !i.Groups["suffix"].Success
-							|| gameData.AuthSuffixes.Contains(i.Groups["suffix"].Value)
-						)
-						// 3. Extract the full loc key (e.g., "tech_foo_desc")
-						.Select(i => i.Groups["key"].Value)
-						// 4. Deduplicate — multiple references may resolve to the same key
-						.Distinct()
-						// 5. Skip loc keys we have no localization for (guard for missing data)
-						.Where(loc.ContainsKey)
-						// 6. Replace each $key$ in descOrig with the resolved text,
-						//    then append the swap-specific content payload
-						.Aggregate(
-							descOrig,
-							(desc, i) => desc.Replace($"${i}$", loc[i]),
-							desc => desc + contentSwap
+					// Repeatedly resolve $key$ references until stable. A resolved
+					// description may itself introduce new references (rare case).
+					// keysResolved is used to detect circular references.
+					HashSet<string> keysResolved = [];
+					string resolvedText = descOrig;
+					while (true) {
+						(resolvedText, string[] keysFound) = ResolveLocReferences(
+							resolvedText,
+							loc,
+							gameData.TechTable.AllTechIds,
+							gameData.AuthSuffixes
 						);
+
+						// No loc keys found → all references resolved transitively.
+						// Also covers the case where descOrig had zero refs.
+						if (keysFound.Length == 0) {
+							break;
+						}
+
+						// A key resolved in an earlier iteration reappeared after
+						// resolution → circular chain (A→B→A or A→A self-ref).
+						// Stop to avoid infinite loop; remaining refs stay as-is.
+						if (keysFound.Intersect(keysResolved).Any()) {
+							LogWarning(Messages.Data.LocalizationCycleReference.Format(descKeyFinal));
+							break;
+						}
+
+						keysResolved.UnionWith(keysFound);
+					}
+
+					string descFinal = resolvedText + contentSwap;
 
 					// Skip if the final text is identical to the base (non-swap) entry.
 					// This commonly happens when authority-specific suffixes produce
@@ -159,6 +161,49 @@ internal sealed class L10nBuilder(GameData gameData) {
 		sb.Append(CultureInfo.InvariantCulture, $"£{tech.Area.ToString().ToLowerInvariant()}£ ['technology:{relTechId}']");
 	}
 
+	// Scans text for $key$ references, separates them into resolvable and
+	// cycled groups, resolves the resolvable ones, and reports both groups
+	// so the call site can handle cycles (log warning, stop iteration).
+	// Mutates previouslyResolved by adding newly resolved keys.
+	private static (string text, string[] foundLocKeys) ResolveLocReferences(
+		string text,
+		ReadOnlyDictionary<string, string> loc,
+		ReadOnlySet<string> knownTechIds,
+		ReadOnlyCollection<string> authSuffixes
+	) {
+		// A tech description may reference another tech's description via loc keys.
+		// Without resolving these references, the output incorrectly nests the
+		// referenced tech's relation info inside the current tech's description:
+		//   [referenced tech's orig desc] + [referenced tech's relation info]
+		//   + [this tech's relation info]
+		// We resolve by replacing loc key references with the referenced tech's
+		// own original description (which doesn't include its relation info).
+		// Note: this changes loc behavior in edge cases (nested references).
+		// Unknown techs are left as-is; this is safe as long as generated loc
+		// is kept up-to-date.
+		string[] foundLocKeys = [.. GlobalInstances.RegexLocReference()
+			.Matches(text)
+			// 1. Only resolve references to techs we actually know about
+			.Where(i => knownTechIds.Contains(i.Groups["id"].Value))
+			// 2. Skip auth-suffixed references pointing to non-existing suffixes
+			.Where(i => !i.Groups["suffix"].Success
+				|| authSuffixes.Contains(i.Groups["suffix"].Value)
+			)
+			// 3. Extract the full loc key (e.g., "tech_foo_desc")
+			.Select(i => i.Groups["key"].Value)
+			// 4. Deduplicate — multiple references may resolve to the same key
+			.Distinct()
+			// 5. Skip loc keys we have no localization for (guard for missing data)
+			.Where(loc.ContainsKey)
+		];
+
+		string resolved = foundLocKeys.Aggregate(
+			text,
+			(desc, key) => desc.Replace($"${key}$", loc[key])
+		);
+
+		return (resolved, foundLocKeys);
+	}
 
 	public void WriteFilesWithProgress(ProgressContext ctx, string destPath) {
 		ProgressTask task = ctx.AddTask(Messages.Progress.WritingLocalization).MaxValue(Generated.Keys.Count);
