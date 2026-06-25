@@ -36,10 +36,13 @@ internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 
 	private static async Task<ReleaseInfo?> CheckVersion(Config.UpdateConfig config) {
 		ReleaseInfo? release = await GetLatestRelease(config);
-		return string.CompareOrdinal(GlobalInstances.GetProgramVersion(), release?.TagName) switch {
-			< 0 => release,
-			_ => null // release is null, or version is smaller (prevented by SemVer) or the same
-		};
+		try {
+			return Version.Parse(GlobalInstances.GetProgramVersion())
+				< Version.Parse(release?.TagName[1..]!)
+				? release : null;
+		} catch {
+			return null; // Malformed version string — suppress notification
+		}
 	}
 
 	private static async Task<ReleaseInfo?> GetLatestRelease(Config.UpdateConfig config) {

@@ -59,7 +59,8 @@ internal static class Inquiries {
 				? Messages.Prompt.ConfirmUseSavedVanilla
 				: Messages.Prompt.ConfirmUseSavedTarget
 			).Format(
-				Escape(config.Playset!.Name), Escape(config.Playset.Target)
+				Escape(config.Playset!.Name),
+				Escape(config.Playset.Target)
 			)
 		);
 	}

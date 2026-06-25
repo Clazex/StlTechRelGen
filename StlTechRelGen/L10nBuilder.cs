@@ -56,6 +56,9 @@ internal sealed class L10nBuilder(GameData gameData) {
 		string contentMain = sb.ToString(); // This includes metadata that's not affected by swaps + relations
 		string descKey = $"{id}_desc";
 
+		// Treat the base tech as a swap of itself so the base entry and every real
+		// swap entry share one generation path. AsSwap() copies only area, categories,
+		// and vanilla — the three properties a technology_swap block may override.
 		foreach ((string swapId, TechSwap swapTech) in tech.Swaps.Prepend(new(id, tech.AsSwap()))) {
 			// Some metadata might be changed by swaps, generate individual copies for each swap
 			string contentSwap = $"\n\n£{swapTech.Area.ToString().ToLowerInvariant()}£"
@@ -92,30 +95,42 @@ internal sealed class L10nBuilder(GameData gameData) {
 						}
 					}
 
-					// We want to handle the case that this tech's desc contains references of
-					// another tech's description
-					// Otherwise we'll got [another tech's orig desc] + [another tech's relation info]
-					// + [this tech's relation info]
-					// We handle this by "resolving" the references and replace them with referenced
-					// text which *will* change the loc behaviour in edge cases
-					// We don't touch the tech we don't know about, this won't cause issue as long as
-					// current generated loc is up-to-date
-					string descFinal = GlobalInstances.RegexLocReference().Matches(descOrig)
-						.Where(i => gameData.TechTable.AllTechIds.Contains(i.Groups["id"].Value)) // The referenced tech exists
-						.Where(i => !i.Groups["suffix"].Success // There is no auth suffix
-							|| gameData.AuthSuffixes.Contains(i.Groups["suffix"].Value) // Or the suffix is valid
+					// A tech description may reference another tech's description via loc keys.
+					// Without resolving these references, the output incorrectly nests the
+					// referenced tech's relation info inside the current tech's description:
+					//   [referenced tech's orig desc] + [referenced tech's relation info]
+					//   + [this tech's relation info]
+					// We resolve by replacing loc key references with the referenced tech's
+					// own original description (which doesn't include its relation info).
+					// Note: this changes loc behavior in edge cases (nested references).
+					// Unknown techs are left as-is; this is safe as long as generated loc
+					// is kept up-to-date.
+					string descFinal = GlobalInstances.RegexLocReference()
+						.Matches(descOrig)
+						// 1. Only resolve references to techs we actually know about
+						.Where(i => gameData.TechTable.AllTechIds.Contains(i.Groups["id"].Value))
+						// 2. Skip auth-suffixed references pointing to non-existing suffixes
+						.Where(i => !i.Groups["suffix"].Success
+							|| gameData.AuthSuffixes.Contains(i.Groups["suffix"].Value)
 						)
-						.Select(i => i.Groups["key"].Value) // The loc key
-						.Distinct() // Deduplicate by loc key
-						.Where(loc.ContainsKey) // We know about the loc key
+						// 3. Extract the full loc key (e.g., "tech_foo_desc")
+						.Select(i => i.Groups["key"].Value)
+						// 4. Deduplicate — multiple references may resolve to the same key
+						.Distinct()
+						// 5. Skip loc keys we have no localization for (guard for missing data)
+						.Where(loc.ContainsKey)
+						// 6. Replace each $key$ in descOrig with the resolved text,
+						//    then append the swap-specific content payload
 						.Aggregate(
-							descOrig, // Starts with original desc
-							(desc, i) => desc.Replace($"${i}$", loc[i]), // Resolve each reference
-							desc => desc + contentSwap // Add the content part w/ swap
+							descOrig,
+							(desc, i) => desc.Replace($"${i}$", loc[i]),
+							desc => desc + contentSwap
 						);
 
+					// Skip if the final text is identical to the base (non-swap) entry.
+					// This commonly happens when authority-specific suffixes produce
+					// the same resolved description — writing duplicates would bloat output.
 					if (!dict.TryGetValue(descKey, out string? baseDesc) || baseDesc != descFinal) {
-						// We don't write if we end up with the same string as the swap-less version
 						dict[descKeySwapFull] = descFinal;
 					}
 				}
@@ -124,7 +139,10 @@ internal sealed class L10nBuilder(GameData gameData) {
 	}
 
 	private void WriteRelatedTech(StringBuilder sb, string relTechId, int indent) {
-		Tech tech = gameData.TechTable.Techs[relTechId];
+		if (!gameData.TechTable.Techs.TryGetValue(relTechId, out Tech? tech)) {
+			// Warning is handled by TechTable, so we simply skip here.
+			return;
+		}
 
 		sb.Append("\n$");
 		for (int i = 0; i < indent; i++) {

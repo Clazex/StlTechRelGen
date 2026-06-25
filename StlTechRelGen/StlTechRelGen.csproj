@@ -46,7 +46,7 @@
 		<PackageReference Include="SQLitePCLRaw.config.e_sqlite3" Version="3.0.3" />
 		<!--
 			Use newer shipped native SQLite builds instead of the vulnerable
-			SQLitePCLRaw.lib.e_sqlite3 package (CVE-2025-6965) use by
+			SQLitePCLRaw.lib.e_sqlite3 package (CVE-2025-6965) used by
 			Microsoft.EntityFrameworkCore.Sqlite
 		-->
 		<PackageReference Include="SourceGear.sqlite3" Version="3.50.4.5" />

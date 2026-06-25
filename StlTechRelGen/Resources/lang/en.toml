@@ -19,9 +19,9 @@ choose_playset = "Choose the desired playset (Press [cyan]Esc[/] to use vanilla 
 current_playset_prefix = "[green](Current)[/] "
 ask_output_path = "What is the output path for generated files?"
 choose_target_mod = "Choose target mod to output generated files"
-colliding_target_mod_list_header = "Path of these mods are listed below:"
+colliding_target_mod_list_header = "Paths of these mods are listed below:"
 colliding_target_mod_list_item = "  - {0}"
-confirm_save_vanilla = "Save selection? ([yellow]Vanilla game[/], Output path: [yellow]{1s}[/])"
+confirm_save_vanilla = "Save selection? ([yellow]Vanilla game[/], Output path: [yellow]{1}[/])"
 confirm_save_target = "Save selection? (Playset: [yellow]{0}[/], target mod: [yellow]{1}[/])"
 
 saved_localization = "Written [cyan]{0}[/] localization files to [grey underline]{1}[/]"

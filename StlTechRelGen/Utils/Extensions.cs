@@ -97,11 +97,11 @@ internal static class Extensions {
 		}
 
 		public IEnumerable<T> DriveProgressTask(ProgressTask task) {
-			IEnumerator<T> enumerator = self.GetEnumerator();
-			task.IsIndeterminate(false).Value(0).MaxValue(self.Count()).StartTask();
+			List<T> list = [.. self];
+			task.IsIndeterminate(false).Value(0).MaxValue(list.Count).StartTask();
 
-			while (enumerator.MoveNext()) {
-				yield return enumerator.Current;
+			foreach (T item in list) {
+				yield return item;
 				task.Increment(1);
 			}
 
@@ -126,6 +126,11 @@ internal static class Extensions {
 	}
 
 	extension(CWLang self) {
+		// CWTools represents game languages as F# discriminated unions:
+		//   CWLang.STL(STLLang.English) -> "english"
+		// The outer switch discriminates STL vs. HOI4/EU4 (never expected
+		// in this project); the inner switch maps STL's ~10 language
+		// variants to Stellaris localization directory names.
 		public string Name() => self is CWLang.STL lang
 			? lang.Item switch {
 				STLLang.English => "english",

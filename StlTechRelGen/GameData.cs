@@ -14,6 +14,8 @@ using static CWTools.Games.Files;
 namespace StlTechRelGen;
 
 internal sealed class GameData {
+	// Read only these 3 common/ subdirectories; everything else is excluded
+	// by ignoreGlobs below. This avoids CWTools parsing irrelevant files.
 	private static readonly IReadOnlyCollection<string> includedCommonSubdirs = [
 		"governments", // auth_suffix is used in localizations
 		"scripted_variables", // may be used everywhere
@@ -47,10 +49,11 @@ internal sealed class GameData {
 				));
 			} else if (File.Exists(path) && Path.GetExtension(path) == ".zip") {
 				string root = path.Replace('\\', '/');
+				using ZipArchive archive = ZipFile.OpenRead(path);
 				return WorkspaceDirectoryInput.NewZD(new(
 					path,
 					Path.GetFileName(path),
-					ZipFile.OpenRead(path).Entries
+					archive.Entries
 						.Select(i => Tuple.Create($"{root}/{i.FullName}", i.Open().ReadToString()))
 						.ToFSharpList()
 				));
@@ -90,6 +93,11 @@ internal sealed class GameData {
 			null
 		));
 
+		// CWTools.STLGame does not expose its internal game object
+		// publicly. Reflection is used to reach the private "game" field
+		// so we can access .Resources.AllEntities for entity-set iteration.
+		// The CWTools version is pinned; if upgrading CWTools, re-check
+		// that the field name and type are still valid.
 		Game = (STLGameObject) typeof(CWTools.Games.Stellaris.STLGame)
 			.GetField("game", BindingFlags.Instance | BindingFlags.NonPublic)!
 			.GetValue(stellaris)!;
@@ -106,7 +114,7 @@ internal sealed class GameData {
 		Parallel.ForEach([
 			() => {
 				gameData.LoadScriptedVariables(ctx);
-				gameData.LoadTechTable(ctx);
+				gameData.LoadTechTable(ctx); // depends on ScriptedVariables
 			},
 			() => gameData.LoadAuthSuffixes(ctx),
 			() => gameData.LoadLocalization(ctx)
@@ -143,6 +151,9 @@ internal sealed class GameData {
 		.ToSortedList(Comparer)
 		.SelectMany(i => i.Children)
 		.Select(i => KeyValuePair.Create(i.Key, i.Tag("localization_postfix")))
+		// The Aggregate implementing the override (last wins).
+		// Prepend(string.Empty) ensures the suffix-less base entry is
+		// always included as the first item in the result list.
 		.Aggregate(
 			new Dictionary<string, string>(),
 			(dict, i) => {
@@ -170,9 +181,11 @@ internal sealed class GameData {
 						try {
 							return GlobalInstances.Yaml.Deserializer.Deserialize<string>(value);
 						} catch (YamlDotNet.Core.YamlException) {
-							// PDX doesn't use "standard" YAML, for example quotes
-							// within quotes without escaping
-							// Hence just do naive parsing as fallback here
+							// Stellaris localization files often contain
+							// unescaped double quotes inside double-quoted
+							// values. PDX's internal parser tolerates this
+							// phenomenon; YamlDotNet does not.
+							// As a fallback, strip surrounding quotes naively.
 							return value.StartsWith('"') && value.EndsWith('"')
 								? value[1..^1]
 								: value;

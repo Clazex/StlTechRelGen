@@ -9,6 +9,9 @@ namespace StlTechRelGen.Utils;
 // Converters = [typeof(CompositeFormatConverter)]
 )]
 [TomlSerializable(typeof(Config))]
+// Lang uses reflection-based deserialization because the Tomlyn source
+// generator cannot handle custom converters (CompositeFormatConverter).
+// See https://github.com/xoofx/Tomlyn/issues/132
 // [TomlSerializable(typeof(Lang))]
 internal sealed partial class TomlContext : TomlSerializerContext {
 	internal sealed class CompositeFormatConverter : TomlConverter<CompositeFormat> {

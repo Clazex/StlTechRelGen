@@ -31,6 +31,9 @@ internal sealed partial class Config {
 		public required string Target { get; set; }
 	}
 
+	// Automatically answers "yes" to confirmation prompts where possible,
+	// reducing interactivity in automated / batch scenarios. Does not
+	// bypass non-y/n prompts such as text input or list selection.
 	[TomlIgnore(Condition = TomlIgnoreCondition.WhenWritingDefault)]
 	public bool Yesmen { get; set; }
 

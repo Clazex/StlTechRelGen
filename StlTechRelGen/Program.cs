@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 using Spectre.Console.Cli;
@@ -33,16 +34,21 @@ public static class Program {
 			return config;
 		}
 
-		CommandApp<CliCommand> app = new();
+		// Spectre.Console.Cli normally runs a command to completion inside
+		// app.Run(). We hijack Execute() to capture parsed arguments into
+		// a static property, then return control to the caller.
+		// If Arguments is null, a built-in option (-h/-v) ran instead;
+		// for those options we call Environment.Exit and never return.
+		CommandApp<CliArgs> app = new();
 		app.Configure(config =>
 			config.UseAssemblyInformationalVersion()
 		);
 		app.Run(args);
 
-		if (CliCommand.Arguments is not CliCommand.Settings arguments) {
+		if (CliArgs.Arguments is not CliArgs.Settings arguments) {
 			// Main command was not invoked, e.g. -h or -v was used
 			Environment.Exit(0);
-			return null; // Unreachable
+			throw new UnreachableException();
 		} else {
 			return arguments.ToConfig();
 		}
@@ -57,7 +63,9 @@ public static class Program {
 		}
 
 		if (config.SuppressesCWToolsErrors) {
-			// Normally there will be two lines of error complaining missing rule files
+			// CWTools emits two error lines about missing rule files.
+			// Suppress them by replacing the F# logError function with a
+			// no-op. FuncConvert.FromAction bridges C# Action to FSharpFunc.
 			CWTools.Utilities.Utils.logError = FuncConvert.FromAction((string _) => { });
 		}
 
@@ -79,7 +87,10 @@ public static class Program {
 				return (
 					l10nBuilder.Generated.Keys.Count,
 					gameData.TechTable.Techs.Count,
-					// On Requires side we'll need to deal with alternatives
+					// * 2 because each Unlocks entry represents a
+					// bidirectional edge: "tech_A requires tech_B"
+					// produces both a "requires" line and an "unlocks"
+					// line in the output.
 					gameData.TechTable.Techs.Values.Sum(i => i.Unlocks.Count) * 2
 				);
 			});

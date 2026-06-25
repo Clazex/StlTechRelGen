@@ -3,7 +3,10 @@ using Spectre.Console.Rendering;
 namespace StlTechRelGen.Utils;
 
 /// <summary>
-/// A column showing the elapsed time of a task. Basically copy-pasted from ElapsedTimeColumn.
+/// A column showing the elapsed time of a task. Copied from Spectre.Console's
+/// ElapsedTimeColumn with the hour display removed (this tool typically runs
+/// for only a few minutes, so hours are unnecessary). Shows <c>**:**</c>
+/// when elapsed time exceeds the two-digit minute display.
 /// </summary>
 public sealed class ShortElapsedTimeColumn : ProgressColumn {
 	/// <inheritdoc/>

@@ -16,10 +16,17 @@ internal static class GameFinder {
 	// We don't know the Xbox Game ID for now
 	// private static readonly XboxGameId ID_XBOX = XboxGameId.From("");
 
+	// Returns the discovered game path, or null if discovery failed.
+	// A null result serves as the default value for the user-input prompt,
+	// allowing the caller to fall back to manual path entry.
 	public static string? Find() {
 		try {
 			return FindNative() ?? FindWine();
 		} catch {
+			// Silently swallow all failures during game discovery.
+			// The caller falls back to prompting the user to enter
+			// the path manually, so individual errors (registry reads,
+			// Wine prefix enumeration, etc.) are not actionable.
 			return null;
 		}
 	}

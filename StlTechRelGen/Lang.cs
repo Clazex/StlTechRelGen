@@ -31,6 +31,7 @@ internal sealed class Lang {
 	public required UpdateMessages Update { get; init; }
 	public required ErrorMessages Error { get; init; }
 
+
 	internal sealed class PromptMessages {
 		public required string SearchPlaceholderText { get; init; }
 		public required string MoreChoicesText { get; init; }
@@ -56,7 +57,6 @@ internal sealed class Lang {
 		public required CompositeFormat CollidingTargetModListItem { get; init; }
 		public required CompositeFormat ConfirmSaveVanilla { get; init; }
 		public required CompositeFormat ConfirmSaveTarget { get; init; }
-
 
 		public required CompositeFormat SavedLocalization { get; init; }
 		public required CompositeFormat GenerationSummary { get; init; }

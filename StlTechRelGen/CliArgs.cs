@@ -4,11 +4,11 @@ using Spectre.Console.Cli;
 
 namespace StlTechRelGen;
 
-internal sealed class CliCommand : Command<CliCommand.Settings> {
+internal sealed class CliArgs : Command<CliArgs.Settings> {
 	internal sealed class Settings : CommandSettings {
-		[CommandOption("-g|--game-path", isRequired: true)]
+		[CommandOption("-g|--game-path")]
 		[Description("Path to the game")]
-		public required string GamePath { get; init; }
+		public string? GamePath { get; init; }
 
 		[CommandOption("-d|--document-path")]
 		[Description("Path to the document")]
@@ -29,9 +29,10 @@ internal sealed class CliCommand : Command<CliCommand.Settings> {
 		public Config ToConfig() => new() {
 			Yesmen = true,
 			Game = new Config.GameConfig {
-				GamePath = GamePath,
+				GamePath = GamePath ?? GameFinder.Find() ??
+					throw new NotSupportedException("Game path is not provided and failed to be found automatically"),
 				DocumentPath = DocumentPath ?? Constants.DefaultDocumentPath ??
-					throw new NotSupportedException("Default document path is not available for this OS"),
+					throw new NotSupportedException("Document path is not provided and cannot be determined automatically for this OS"),
 			},
 			Playset = new Config.PlaysetConfig {
 				Name = Playset,

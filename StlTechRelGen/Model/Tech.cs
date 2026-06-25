@@ -24,38 +24,40 @@ internal sealed class Tech(
 	public List<string> Unlocks { get; private init; } = [];
 	public Dictionary<string, TechSwap> Swaps { get; private init; } = swaps;
 
+	// Only 3 of 11 properties: area and categories are what swaps can
+	// override. All other properties never differ per swap.
 	public TechSwap AsSwap() => new(Vanilla, Area, Categories);
+
+	// Parse a value that may be either a plain integer or a @-prefixed
+	// scripted variable reference. The @ prefix denotes a lookup into
+	// common/scripted_variables/. Anything that is neither a plain
+	// integer nor a @-prefixed variable reference is illegal and throws.
+	private static int ParseIntOrVariable(string fieldValue, string fieldName, IReadOnlyDictionary<string, CWValue> variables) {
+		if (int.TryParse(fieldValue, out int result)) {
+			return result;
+		}
+
+		if (!fieldValue.StartsWith('@')) {
+			throw new NotSupportedException($"Unexpected {fieldName} value: {fieldValue}");
+		}
+
+		return ((CWValue.Int) variables[fieldValue]).Item;
+	}
 
 	public static Tech Parse(CWNode node, CWComparer cwComparer, IReadOnlyDictionary<string, CWValue> variables) {
 		bool vanilla = cwComparer.IsVanilla(node.Position);
 		TechArea area = Enum.Parse<TechArea>(node.Tag("area").Value.ToRawString(), true);
 
-		string tierStr = node.Tag("tier").Value.ToRawString();
-		if (!int.TryParse(tierStr, out int tier)) {
-			if (!tierStr.StartsWith('@')) {
-				throw new NotSupportedException($"Unexpected tier value: {tierStr}");
-			}
-
-			tier = ((CWValue.Int) variables[tierStr]).Item;
-		}
+		int tier = ParseIntOrVariable(node.Tag("tier").Value.ToRawString(), "tier", variables);
 
 		List<string> categories = [.. node.Child("category").Value.LeafValues.Select(i => i.ValueText)];
 
 		int levels = node.Tag("levels")
-			.Map(x => {
-				string str = x.ToRawString();
-				if (int.TryParse(str, out int levels)) {
-					return levels;
-				}
-
-				if (!str.StartsWith('@')) {
-					throw new NotSupportedException($"Unexpected levels value: {str}");
-				}
-
-				return ((CWValue.Int) variables[str]).Item;
-			})
+			.Map(x => ParseIntOrVariable(x.ToRawString(), "levels", variables))
 			.UnwrapOr(1);
 
+		// Stellaris represents booleans as the case-insensitive strings
+		// "yes"/"no" rather than JSON-style true/false.
 		bool dangerous = node.Tag("is_dangerous")
 			.Map(x => x.ToRawString().Equals("yes", StringComparison.OrdinalIgnoreCase))
 			.UnwrapOr(false);
@@ -63,6 +65,12 @@ internal sealed class Tech(
 			.Map(x => x.ToRawString().Equals("yes", StringComparison.OrdinalIgnoreCase))
 			.UnwrapOr(false);
 
+		// Prerequisites use a dual-track structure:
+		//   LeafValues are direct tech IDs — all are required (implicit AND).
+		//   Children named "OR" provide a set of tech IDs where any one
+		//   of them satisfies the clause (explicit OR).
+		// The two tracks are combined into a flat list of TechRequirement
+		// instances, carrying the original AND/OR semantics downstream.
 		List<TechRequirement> requires = node.Child("prerequisites")
 			.Map(x => {
 				List<TechRequirement> list = [.. x.LeafValues.Select(x => new TechRequirementSingle(x.Value.ToRawString()))];

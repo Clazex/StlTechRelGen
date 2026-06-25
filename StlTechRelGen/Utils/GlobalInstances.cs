@@ -6,6 +6,9 @@ internal static partial class GlobalInstances {
 	public static class Yaml {
 		internal static YamlDeserializer Deserializer { get; } = new();
 
+		// PDX localization files always use double-quoted strings with
+		// Unix-style newlines. The serializer must match this format
+		// exactly; otherwise the game may fail to parse the output YAML.
 		internal static IYamlSerializer Serializer { get; } = new YamlSerializerBuilder()
 			.WithDefaultScalarStyle(YamlDotNet.Core.ScalarStyle.DoubleQuoted)
 			.WithNewLine("\n")
@@ -19,6 +22,12 @@ internal static partial class GlobalInstances {
 
 	internal static HttpClient Client { get; } = new();
 
+	// Matches $tech_id_desc_suffix$ references embedded in localization text.
+	// Named groups:
+	//   key    — full loc key inside $...$ (e.g. "tech_foo_desc_bar")
+	//   id     — tech identifier part (e.g. "tech_foo")
+	//   suffix — optional auth suffix (e.g. "_bar"); may not be present.
+	//            The .+ is greedy and will capture everything after _desc.
 	[GeneratedRegex(
 		@"^\$(?<key>(?<id>.+)_desc(?<suffix>_.+)?)\$$",
 		RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.CultureInvariant
@@ -38,7 +47,7 @@ internal static partial class GlobalInstances {
 			GetProgramVersion()
 		));
 
-	public static string GetProgramVersion() => "v" + Assembly
+	public static string GetProgramVersion() => Assembly
 		.GetExecutingAssembly()
 		.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
 		.InformationalVersion!;
