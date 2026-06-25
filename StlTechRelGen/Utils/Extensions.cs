@@ -19,18 +19,24 @@ internal static class Extensions {
 	}
 
 	extension(string self) {
+		// Find the longest common prefix between two path strings.
+		// Uses Span<char> for zero-allocation per-character comparison;
+		// this is called heavily by CwComparer for mod-index resolution.
 		public string CommonPrefix(string other, StringComparison comparison = default) {
 			if (string.IsNullOrEmpty(self) || string.IsNullOrEmpty(other)) {
 				return string.Empty;
 			}
 
-			for (int i = 0; i < Math.Min(self.Length, other.Length); i++) {
-				if (string.Equals(self[i..(i + 1)], other[i..(i + 1)], comparison)) {
-					return self[..(i + 1)];
+			int commonLength = Math.Min(self.Length, other.Length);
+			ReadOnlySpan<char> selfSpan = self.AsSpan();
+			ReadOnlySpan<char> otherSpan = other.AsSpan();
+			for (int i = 0; i < commonLength; i++) {
+				if (!MemoryExtensions.Equals(selfSpan[i..(i + 1)], otherSpan[i..(i + 1)], comparison)) {
+					return self[..i];
 				}
 			}
 
-			return self;
+			return self[..commonLength];
 		}
 	}
 
