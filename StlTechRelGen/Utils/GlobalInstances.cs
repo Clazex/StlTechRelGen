@@ -9,10 +9,13 @@ internal static partial class GlobalInstances {
 		// PDX localization files always use double-quoted strings with
 		// Unix-style newlines. The serializer must match this format
 		// exactly; otherwise the game may fail to parse the output YAML.
-		internal static IYamlSerializer Serializer { get; } = new YamlSerializerBuilder()
-			.WithDefaultScalarStyle(YamlDotNet.Core.ScalarStyle.DoubleQuoted)
-			.WithNewLine("\n")
-			.Build();
+		internal static IYamlSerializer Serializer { get; } =
+			new YamlSerializerBuilder()
+				.WithDefaultScalarStyle(
+					YamlDotNet.Core.ScalarStyle.DoubleQuoted
+				)
+				.WithNewLine("\n")
+				.Build();
 	}
 
 	internal static Encoding Utf8Bom { get; } = new UTF8Encoding(

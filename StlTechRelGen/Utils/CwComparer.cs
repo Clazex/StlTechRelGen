@@ -25,7 +25,9 @@ internal sealed class CWComparer(
 	// This is a greedy heuristic: the mod whose root path has the most
 	// characters in common with the file path is assumed to own the file.
 	public int ModIndex(CWRange range) => ModPaths.Index()
-		.MaxBy((i) => range.FileName.CommonPrefix(i.Item, StringComparison.OrdinalIgnoreCase).Length)
+		.MaxBy((i) => range.FileName.CommonPrefix(
+			i.Item, StringComparison.OrdinalIgnoreCase
+		).Length)
 		.Index;
 
 	public int Compare(CWNode? x, CWNode? y) {
@@ -40,7 +42,10 @@ internal sealed class CWComparer(
 		return 0;
 	}
 
-	public int Compare(CWTools.Localisation.Entry x, CWTools.Localisation.Entry y) =>
+	public int Compare(
+		CWTools.Localisation.Entry x,
+		CWTools.Localisation.Entry y
+	) =>
 		Compare(x.position, y.position);
 
 	// Three-tier sort order matching Stellaris mod override rules

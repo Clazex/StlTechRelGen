@@ -1,7 +1,8 @@
 namespace StlTechRelGen.Utils;
 
 internal static class Constants {
-	public static string ConfigPath { get; } = Path.ChangeExtension(Environment.ProcessPath!, "toml");
+	public static string ConfigPath { get; } =
+		Path.ChangeExtension(Environment.ProcessPath!, "toml");
 
 	// https://stellaris.paradoxwikis.com/Modding#Mod_folder_location
 	public static string? DefaultDocumentPath {

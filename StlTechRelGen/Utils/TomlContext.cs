@@ -11,7 +11,8 @@ namespace StlTechRelGen.Utils;
 [TomlSerializable(typeof(Config))]
 [TomlSerializable(typeof(Lang))]
 internal sealed partial class TomlContext : TomlSerializerContext {
-	internal sealed class CompositeFormatConverter : TomlConverter<CompositeFormat> {
+	internal sealed class CompositeFormatConverter
+		: TomlConverter<CompositeFormat> {
 		public override CompositeFormat? Read(TomlReader reader) =>
 			System.Text.CompositeFormat.Parse(reader.GetString());
 

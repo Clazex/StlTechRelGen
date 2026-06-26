@@ -7,17 +7,22 @@ internal sealed class Lang {
 
 	internal static Lang Messages { get; private set; } = null!;
 
-	static Lang() => LoadMessages(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch {
-		"en" => "en",
-		"zh" => "zh",
-		_ => DEFAULT_LANG
-	});
+	static Lang() => LoadMessages(
+		CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch {
+			"en" => "en",
+			"zh" => "zh",
+			_ => DEFAULT_LANG
+		});
 
-	internal static void LoadMessages(string? lang) => Messages = TomlSerializer.Deserialize(
-		Assembly.GetExecutingAssembly()
-			.GetManifestResourceStream($"{nameof(StlTechRelGen)}.Resources.lang.{lang}.toml")!,
-		TomlContext.Default.Lang
-	)!;
+	internal static void LoadMessages(string? lang) =>
+		Messages = TomlSerializer.Deserialize(
+			Assembly.GetExecutingAssembly()
+				.GetManifestResourceStream(
+					$"{nameof(StlTechRelGen)}"
+					+ $".Resources.lang.{lang}.toml"
+				)!,
+			TomlContext.Default.Lang
+		)!;
 
 	public required PromptMessages Prompt { get; init; }
 	public required ProgressMessages Progress { get; init; }

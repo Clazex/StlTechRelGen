@@ -12,12 +12,15 @@ internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 		public string Body { get; set; } = null!;
 	}
 
-	[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower)]
+	[JsonSourceGenerationOptions(
+		PropertyNamingPolicy = JsonKnownNamingPolicy.SnakeCaseLower
+	)]
 	[JsonSerializable(typeof(ReleaseInfo))]
 	private sealed partial class JsonContext : JsonSerializerContext {
 	}
 
-	private Task<ReleaseInfo?> CheckTask { get; init; } = Task.Run(() => CheckVersion(config));
+	private Task<ReleaseInfo?> CheckTask { get; init; } =
+		Task.Run(() => CheckVersion(config));
 
 	public void TryReport() {
 		if (!config.WaitForCheckBeforeExit && !CheckTask.IsCompletedSuccessfully) {
@@ -37,7 +40,9 @@ internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 		}
 	}
 
-	private static async Task<ReleaseInfo?> CheckVersion(Config.UpdateConfig config) {
+	private static async Task<ReleaseInfo?> CheckVersion(
+		Config.UpdateConfig config
+	) {
 		ReleaseInfo? release = await GetLatestRelease(config);
 		try {
 			return Version.Parse(GlobalInstances.GetProgramVersion())
@@ -48,7 +53,9 @@ internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 		}
 	}
 
-	private static async Task<ReleaseInfo?> GetLatestRelease(Config.UpdateConfig config) {
+	private static async Task<ReleaseInfo?> GetLatestRelease(
+		Config.UpdateConfig config
+	) {
 		HttpRequestMessage request = new(HttpMethod.Get, Constants.CheckUpdateUrl);
 		request.Headers.Accept.Add(new("application/vnd.github+json"));
 		request.Headers.Add("X-GitHub-Api-Version", "2026-03-10");
@@ -62,13 +69,15 @@ internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 			request.Headers.Authorization = new("Bearer", token);
 		}
 
-		HttpResponseMessage response = await GlobalInstances.Client.SendAsync(request);
+		HttpResponseMessage response = await GlobalInstances.Client
+			.SendAsync(request);
 		if (!response.IsSuccessStatusCode) {
 			// In case of 304, there is no need to update ETag record as well
 			return null;
 		}
 
 		config.LastETag = response.Headers.ETag?.Tag;
-		return await response.Content.ReadFromJsonAsync(JsonContext.Default.ReleaseInfo);
+		return await response.Content
+			.ReadFromJsonAsync(JsonContext.Default.ReleaseInfo);
 	}
 }

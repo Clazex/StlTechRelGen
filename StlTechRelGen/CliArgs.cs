@@ -31,11 +31,13 @@ internal sealed class CliArgs : Command<CliArgs.Settings> {
 			Game = new Config.GameConfig {
 				GamePath = GamePath ?? GameFinder.Find()
 					?? throw new NotSupportedException(
-						"Game path is not provided and failed to be found automatically"
+						"Game path is not provided and failed to be found"
+						+ " automatically"
 					),
 				DocumentPath = DocumentPath ?? Constants.DefaultDocumentPath
 					?? throw new NotSupportedException(
-						"Document path is not provided and cannot be determined automatically for this OS"
+						"Document path is not provided and cannot be"
+						+ " determined automatically for this OS"
 					),
 			},
 			Playset = new Config.PlaysetConfig {
@@ -51,7 +53,11 @@ internal sealed class CliArgs : Command<CliArgs.Settings> {
 	internal static Settings? Arguments { get; private set; }
 
 	// We only utilize argument parsing feature here
-	protected override int Execute(CommandContext context, Settings arguments, CancellationToken cancellationToken) {
+	protected override int Execute(
+		CommandContext ctx,
+		Settings arguments,
+		CancellationToken ct
+	) {
 		Arguments = arguments;
 		return 0;
 	}

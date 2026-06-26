@@ -18,7 +18,11 @@ public sealed class ShortElapsedTimeColumn : ProgressColumn {
 	public Style Style { get; set; } = Color.Blue;
 
 	/// <inheritdoc/>
-	public override IRenderable Render(RenderOptions options, ProgressTask task, TimeSpan deltaTime) {
+	public override IRenderable Render(
+		RenderOptions options,
+		ProgressTask task,
+		TimeSpan deltaTime
+	) {
 		TimeSpan? elapsed = task.ElapsedTime;
 		if (elapsed == null) {
 			return new Markup("--:--");

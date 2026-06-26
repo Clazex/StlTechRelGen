@@ -42,19 +42,32 @@ internal sealed class Tech(
 		}
 
 		if (!fieldValue.StartsWith('@')) {
-			throw new NotSupportedException($"Unexpected {fieldName} value: {fieldValue}");
+			throw new NotSupportedException(
+				$"Unexpected {fieldName} value: {fieldValue}"
+			);
 		}
 
 		return ((CWValue.Int) variables[fieldValue]).Item;
 	}
 
-	public static Tech Parse(CWNode node, CWComparer cwComparer, IReadOnlyDictionary<string, CWValue> variables) {
+	public static Tech Parse(
+		CWNode node,
+		CWComparer cwComparer,
+		IReadOnlyDictionary<string, CWValue> variables
+	) {
 		bool vanilla = cwComparer.IsVanilla(node.Position);
-		TechArea area = Enum.Parse<TechArea>(node.Tag("area").Value.ToRawString(), true);
+		TechArea area = Enum.Parse<TechArea>(
+			node.Tag("area").Value.ToRawString(), true
+		);
 
-		int tier = ParseIntOrVariable(node.Tag("tier").Value.ToRawString(), "tier", variables);
+		int tier = ParseIntOrVariable(
+			node.Tag("tier").Value.ToRawString(), "tier", variables
+		);
 
-		List<string> categories = [.. node.Child("category").Value.LeafValues.Select(i => i.ValueText)];
+		List<string> categories = [
+			.. node.Child("category").Value.LeafValues
+				.Select(i => i.ValueText)
+		];
 
 		int levels = node.Tag("levels")
 			.Map(x => ParseIntOrVariable(x.ToRawString(), "levels", variables))
@@ -97,7 +110,10 @@ internal sealed class Tech(
 			})
 			.UnwrapOr([]);
 
-		Tech tech = new(vanilla, area, tier, categories, levels, dangerous, rare, requires, []);
+		Tech tech = new(
+			vanilla, area, tier, categories,
+			levels, dangerous, rare, requires, []
+		);
 		foreach (CWNode swapNode in node.Childs("technology_swap")) {
 			if (OptionModule.IsNone(swapNode.Tag("name"))) {
 				LogError(Messages.Data.TechUnnamedSwap.Format(node.Key));

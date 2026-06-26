@@ -32,7 +32,8 @@ internal static class GameFinder {
 	}
 
 	private static string? FindNative() {
-		IRegistry? registry = OperatingSystem.IsWindows() ? WindowsRegistry.Shared : null;
+		IRegistry? registry = OperatingSystem.IsWindows()
+			? WindowsRegistry.Shared : null;
 
 		// Steam
 		if (new SteamHandler(FileSystem.Shared, registry)

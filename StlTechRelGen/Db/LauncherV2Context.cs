@@ -3,14 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace StlTechRelGen.Db;
 
-internal sealed partial class LauncherV2DbContext(Config.GameConfig config) : DbContext {
+internal sealed partial class LauncherV2DbContext(
+	Config.GameConfig config
+) : DbContext {
 	public DbSet<Mod> Mods { get; private set; }
 
 	public DbSet<Playset> Playsets { get; private set; }
 
 	public DbSet<PlaysetsMod> PlaysetsMods { get; private set; }
 
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) => optionsBuilder
+	protected override void OnConfiguring(
+		DbContextOptionsBuilder optionsBuilder
+	) => optionsBuilder
 		.UseModel(LauncherV2DbContextModel.Instance)
 		.UseSqlite(
 			new SqliteConnectionStringBuilder() {
@@ -41,7 +45,9 @@ internal sealed partial class LauncherV2DbContext(Config.GameConfig config) : Db
 			entity.Property(e => e.SubscribersCount).HasDefaultValueSql("'0'");
 		});
 
-		modelBuilder.Entity<PlaysetsMod>(entity => entity.Property(e => e.Enabled).HasDefaultValueSql("'1'"));
+		modelBuilder.Entity<PlaysetsMod>(entity =>
+			entity.Property(e => e.Enabled).HasDefaultValueSql("'1'")
+		);
 
 		OnModelCreatingPartial(modelBuilder);
 	}

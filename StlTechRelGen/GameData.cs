@@ -30,10 +30,13 @@ internal sealed class GameData {
 
 	public CWComparer Comparer { get; private init; }
 
-	public ReadOnlyDictionary<string, CWValue> ScriptedVariables { get; private set; } = null!;
+	public ReadOnlyDictionary<string, CWValue> ScriptedVariables {
+		get; private set;
+	} = null!;
 	public ReadOnlyCollection<string> AuthSuffixes { get; private set; } = null!;
 	public TechTable TechTable { get; private set; } = null!;
-	public ReadOnlyDictionary<CWLang, ReadOnlyDictionary<string, string>> Localizations = null!;
+	public ReadOnlyDictionary<CWLang, ReadOnlyDictionary<string, string>>
+		Localizations = null!;
 
 	private GameData(Config config, IEnumerable<(string name, string path)> mods) {
 		string commonDir = Path.Combine(config.Game.GamePath, "common");
@@ -54,7 +57,10 @@ internal sealed class GameData {
 					path,
 					Path.GetFileName(path),
 					archive.Entries
-						.Select(i => Tuple.Create($"{root}/{i.FullName}", i.Open().ReadToString()))
+						.Select(i => Tuple.Create(
+							$"{root}/{i.FullName}",
+							i.Open().ReadToString()
+						))
 						.ToFSharpList()
 				));
 			}
@@ -69,10 +75,17 @@ internal sealed class GameData {
 			.ToFSharpList();
 
 		// Exclude subdirs of common
-		FSharpList<string> ignoreGlobs = Directory.EnumerateDirectories(commonDir, "*", SearchOption.TopDirectoryOnly)
+		FSharpList<string> ignoreGlobs = Directory
+			.EnumerateDirectories(
+				commonDir, "*", SearchOption.TopDirectoryOnly
+			)
 			.Select(i => Path.GetRelativePath(commonDir, i))
 			// Except for these
-			.Where(i => includedCommonSubdirs.All(j => !string.Equals(i, j, StringComparison.OrdinalIgnoreCase)))
+			.Where(i => includedCommonSubdirs.All(
+				j => !string.Equals(
+					i, j, StringComparison.OrdinalIgnoreCase
+				)
+			))
 			.Select(i => $"common/{i}/")
 			// Along with other hardcoded dirs that will be read by CWTools
 			// https://github.com/cwtools/cwtools/blob/b377453dee803f9258be92cfc49896d09039702d/CWTools/Common/STLConstants.fs#L156-L170
@@ -82,19 +95,18 @@ internal sealed class GameData {
 			])
 			.ToFSharpList();
 
-		CWTools.Games.Stellaris.STLGame stellaris = new(new GameSetupSettings<STLLookup>(
-			sourceDirs,
-			EmbeddedSetupSettings.NewFromConfig(
-				[],
-				[]
-			),
-			new ValidationSettings(LangHelpers.allSTLLangs, true, false),
-			null,
-			null,
-			ignoreGlobs,
-			null,
-			null
-		));
+		CWTools.Games.Stellaris.STLGame stellaris = new(
+			new GameSetupSettings<STLLookup>(
+				sourceDirs,
+				EmbeddedSetupSettings.NewFromConfig([], []),
+				new ValidationSettings(LangHelpers.allSTLLangs, true, false),
+				null,
+				null,
+				ignoreGlobs,
+				null,
+				null
+			)
+		);
 
 		// CWTools.STLGame does not expose its internal game object
 		// publicly. Reflection is used to reach the private "game" field
@@ -121,7 +133,8 @@ internal sealed class GameData {
 		Parallel.ForEach([
 			() => {
 				gameData.LoadScriptedVariables(ctx);
-				gameData.LoadTechTable(ctx); // depends on ScriptedVariables
+				// Depends on ScriptedVariables
+				gameData.LoadTechTable(ctx);
 			},
 			() => gameData.LoadAuthSuffixes(ctx),
 			() => gameData.LoadLocalization(ctx)
@@ -130,49 +143,61 @@ internal sealed class GameData {
 		return gameData;
 	}
 
-	private void LoadScriptedVariables(ProgressContext ctx) => ScriptedVariables = Entities
-		.AllOfType(STLConstants.EntityType.ScriptedVariables)
-		.DriveProgressTask(ctx.AddTask(Messages.Progress.LoadingScriptedVariables))
-		.Select(i => i.Item1)
-		.ToSortedList(Comparer)
-		.SelectMany(i => i.Leaves)
-		.ToDictionaryOverwriting(i => i.Key, i => i.Value)
-		.AsReadOnly();
+	private void LoadScriptedVariables(ProgressContext ctx) =>
+		ScriptedVariables = Entities
+			.AllOfType(STLConstants.EntityType.ScriptedVariables)
+			.DriveProgressTask(ctx.AddTask(
+				Messages.Progress.LoadingScriptedVariables
+			))
+			.Select(i => i.Item1)
+			.ToSortedList(Comparer)
+			.SelectMany(i => i.Leaves)
+			.ToDictionaryOverwriting(i => i.Key, i => i.Value)
+			.AsReadOnly();
 
-	private void LoadTechTable(ProgressContext ctx) => TechTable = new(ctx, Entities
-		.AllOfType(STLConstants.EntityType.Technology)
-		.DriveProgressTask(ctx.AddTask(Messages.Progress.LoadingTechnologies))
-		.Select(i => i.Item1)
-		.ToSortedList(Comparer)
-		.SelectMany(i => i.Children)
-		.ToDictionaryOverwriting(
-			i => i.Key,
-			i => Tech.Parse(i, Comparer, ScriptedVariables)
-		)
-	);
+	private void LoadTechTable(ProgressContext ctx) =>
+		TechTable = new(ctx, Entities
+			.AllOfType(STLConstants.EntityType.Technology)
+			.DriveProgressTask(ctx.AddTask(
+				Messages.Progress.LoadingTechnologies
+			))
+			.Select(i => i.Item1)
+			.ToSortedList(Comparer)
+			.SelectMany(i => i.Children)
+			.ToDictionaryOverwriting(
+				i => i.Key,
+				i => Tech.Parse(i, Comparer, ScriptedVariables)
+			)
+		);
 
-	private void LoadAuthSuffixes(ProgressContext ctx) => AuthSuffixes = Entities
-		.AllOfType(STLConstants.EntityType.Authorities)
-		.DriveProgressTask(ctx.AddTask(Messages.Progress.LoadingAuthoritySuffixes))
-		.Select(i => i.Item1)
-		.ToSortedList(Comparer)
-		.SelectMany(i => i.Children)
-		.Select(i => KeyValuePair.Create(i.Key, i.Tag("localization_postfix")))
-		// The Aggregate implementing the override (last wins).
-		// Prepend(string.Empty) ensures the suffix-less base entry is
-		// always included as the first item in the result list.
-		.Aggregate(
-			new Dictionary<string, string>(),
-			(dict, i) => {
-				if (OptionModule.IsSome(i.Value)) {
-					dict[i.Key] = '_' + i.Value.Value.ToRawString();
-				}
+	private void LoadAuthSuffixes(ProgressContext ctx) =>
+		AuthSuffixes = Entities
+			.AllOfType(STLConstants.EntityType.Authorities)
+			.DriveProgressTask(ctx.AddTask(
+				Messages.Progress.LoadingAuthoritySuffixes
+			))
+			.Select(i => i.Item1)
+			.ToSortedList(Comparer)
+			.SelectMany(i => i.Children)
+			.Select(i => KeyValuePair.Create(
+				i.Key,
+				i.Tag("localization_postfix")
+			))
+			// The Aggregate implementing the override (last wins).
+			// Prepend(string.Empty) ensures the suffix-less base entry is
+			// always included as the first item in the result list.
+			.Aggregate(
+				new Dictionary<string, string>(),
+				(dict, i) => {
+					if (OptionModule.IsSome(i.Value)) {
+						dict[i.Key] = '_' + i.Value.Value.ToRawString();
+					}
 
-				return dict;
-			},
-			(dict) => dict.Values.Prepend(string.Empty).ToList()
-		)
-		.AsReadOnly();
+					return dict;
+				},
+				(dict) => dict.Values.Prepend(string.Empty).ToList()
+			)
+			.AsReadOnly();
 
 	private void LoadLocalization(ProgressContext ctx) {
 		ConcurrentDictionary<CWLang, ReadOnlyDictionary<string, string>> L10n = new();
@@ -180,7 +205,10 @@ internal sealed class GameData {
 			.MaxValue(Game.LocalisationManager.LocalisationEntries().Length);
 
 		Parallel.ForEach(Game.LocalisationManager.LocalisationEntries(), (x) => {
-			L10n[x.Item1] = x.Item2.ToSortedList((x, y) => Comparer.Compare(x.Item2, y.Item2))
+			L10n[x.Item1] = x.Item2
+				.ToSortedList(
+					(x, y) => Comparer.Compare(x.Item2, y.Item2)
+				)
 				.ToDictionaryOverwriting(
 					i => i.Item1,
 					i => {

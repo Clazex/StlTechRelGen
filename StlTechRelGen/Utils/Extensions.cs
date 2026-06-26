@@ -5,7 +5,9 @@ namespace StlTechRelGen.Utils;
 internal static class Extensions {
 	extension(Db.Mod self) {
 		public string Path() => self.DirPath ?? self.ArchivePath
-			?? throw new InvalidDataException($"Mod {self.DisplayName} has no path");
+			?? throw new InvalidDataException(
+				$"Mod {self.DisplayName} has no path"
+			);
 	}
 
 	extension(Db.LauncherV2DbContext self) {
@@ -13,8 +15,12 @@ internal static class Extensions {
 			IQueryable<Db.PlaysetsMod> playsetMods = self.PlaysetsMods
 				.Where(i => (i.Enabled ?? false) && i.PlaysetId == playset.Id);
 			return self.Mods
-				.Where(i => i.Status == "ready_to_play" && playsetMods.Any(j => j.ModId == i.Id))
-				.OrderBy(i => playsetMods.Single(j => j.ModId == i.Id).Position);
+				.Where(i => i.Status == "ready_to_play"
+					&& playsetMods.Any(j => j.ModId == i.Id)
+				)
+				.OrderBy(i =>
+					playsetMods.Single(j => j.ModId == i.Id).Position
+				);
 		}
 	}
 
@@ -22,7 +28,10 @@ internal static class Extensions {
 		// Find the longest common prefix between two path strings.
 		// Uses Span<char> for zero-allocation per-character comparison;
 		// this is called heavily by CwComparer for mod-index resolution.
-		public string CommonPrefix(string other, StringComparison comparison = default) {
+		public string CommonPrefix(
+			string other,
+			StringComparison comparison = default
+		) {
 			if (string.IsNullOrEmpty(self) || string.IsNullOrEmpty(other)) {
 				return string.Empty;
 			}
@@ -31,7 +40,11 @@ internal static class Extensions {
 			ReadOnlySpan<char> selfSpan = self.AsSpan();
 			ReadOnlySpan<char> otherSpan = other.AsSpan();
 			for (int i = 0; i < commonLength; i++) {
-				if (!MemoryExtensions.Equals(selfSpan[i..(i + 1)], otherSpan[i..(i + 1)], comparison)) {
+				if (!MemoryExtensions.Equals(
+					selfSpan[i..(i + 1)],
+					otherSpan[i..(i + 1)],
+					comparison
+				)) {
 					return self[..i];
 				}
 			}
@@ -93,7 +106,8 @@ internal static class Extensions {
 
 			IEnumerator<T> enumerator = self.GetEnumerator();
 			while (enumerator.MoveNext()) {
-				dict[keySelector(enumerator.Current)] = valueSelector(enumerator.Current);
+				dict[keySelector(enumerator.Current)] =
+					valueSelector(enumerator.Current);
 			}
 
 			return dict;
@@ -101,7 +115,10 @@ internal static class Extensions {
 
 		public IEnumerable<T> DriveProgressTask(ProgressTask task) {
 			List<T> list = [.. self];
-			task.IsIndeterminate(false).Value(0).MaxValue(list.Count).StartTask();
+			task.IsIndeterminate(false)
+				.Value(0)
+				.MaxValue(list.Count)
+				.StartTask();
 
 			foreach (T item in list) {
 				yield return item;
@@ -121,11 +138,13 @@ internal static class Extensions {
 	}
 
 	extension<T>(FSharpOption<T> self) {
-		public FSharpOption<TTo> Map<TTo>(Func<T, TTo> mapper) => OptionModule.IsSome(self)
+		public FSharpOption<TTo> Map<TTo>(Func<T, TTo> mapper) =>
+			OptionModule.IsSome(self)
 			? FSharpOption<TTo>.Some(mapper.Invoke(self.Value))
 			: FSharpOption<TTo>.None;
 
-		public T UnwrapOr(T fallback) => OptionModule.DefaultValue(fallback, self);
+		public T UnwrapOr(T fallback) =>
+			OptionModule.DefaultValue(fallback, self);
 	}
 
 	extension(CWLang self) {
@@ -159,7 +178,10 @@ internal static class Extensions {
 	}
 
 	extension(Progress self) {
-		public Progress UsePreset() => self.AutoClear(false).HideCompleted(false).Columns(
+		public Progress UsePreset() => self
+			.AutoClear(false)
+			.HideCompleted(false)
+			.Columns(
 			new SpinnerColumn(Spinner.Known.Default),
 			new PercentageColumn().Style(new(foreground: Color.Blue)),
 			new TaskDescriptionColumn(),

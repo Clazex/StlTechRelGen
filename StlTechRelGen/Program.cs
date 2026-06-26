@@ -82,21 +82,29 @@ public static class Program {
 				GameData gameData = LoadGameData(ctx, config, mods);
 				L10nBuilder l10nBuilder = BuildL10n(ctx, gameData);
 				WriteL10nFragments(ctx, l10nDir);
-				l10nBuilder.WriteFilesWithProgress(ctx, l10nDir.CreateSubdirectory("replace").FullName);
+				l10nBuilder.WriteFilesWithProgress(
+					ctx,
+					l10nDir.CreateSubdirectory("replace").FullName
+				);
 
 				return (
 					l10nBuilder.Generated.Keys.Count,
 					gameData.TechTable.Techs.Count,
-					// * 2 because each Unlocks entry represents a
-					// bidirectional edge: "tech_A requires tech_B"
+					// 2 * because each Unlocks entry represents a
+					// bidirectional edge: "tech_a requires tech_b"
 					// produces both a "requires" line and an "unlocks"
 					// line in the output.
-					gameData.TechTable.Techs.Values.Sum(i => i.Unlocks.Count) * 2
+					2 * gameData.TechTable.Techs.Values
+						.Sum(i => i.Unlocks.Count)
 				);
 			});
 
-		AnsiConsole.MarkupLine(Messages.Prompt.SavedL10n.Format(countL10nFiles, l10nDir.FullName));
-		AnsiConsole.MarkupLine(Messages.Prompt.GenerationSummary.Format(countRelations, countTechs));
+		AnsiConsole.MarkupLine(
+			Messages.Prompt.SavedL10n.Format(countL10nFiles, l10nDir.FullName)
+		);
+		AnsiConsole.MarkupLine(
+			Messages.Prompt.GenerationSummary.Format(countRelations, countTechs)
+		);
 		if (!config.Yesmen) {
 			Inquiries.Pause();
 		}
@@ -113,13 +121,19 @@ public static class Program {
 
 			outputDirectory.Create();
 		} catch {
-			LogError(Messages.Error.FailedToAccessOutputDir.Format(outputDirectory.FullName));
+			LogError(Messages.Error.FailedToAccessOutputDir
+				.Format(outputDirectory.FullName));
 			throw;
 		}
 	}
 
-	private static GameData LoadGameData(ProgressContext ctx, Config config, Mod[] sourceMods) =>
-		GameData.LoadWithProgress(ctx, config, sourceMods.Select(i => (i.DisplayName!, i.Path())));
+	private static GameData LoadGameData(
+		ProgressContext ctx,
+		Config config,
+		Mod[] sourceMods
+	) => GameData.LoadWithProgress(
+		ctx, config, sourceMods.Select(i => (i.DisplayName!, i.Path()))
+	);
 
 	private static L10nBuilder BuildL10n(ProgressContext ctx, GameData gameData) {
 		L10nBuilder l10nBuilder = new(gameData);
@@ -129,7 +143,10 @@ public static class Program {
 		return l10nBuilder;
 	}
 
-	private static void WriteL10nFragments(ProgressContext ctx, DirectoryInfo outputDirectory) {
+	private static void WriteL10nFragments(
+		ProgressContext ctx,
+		DirectoryInfo outputDirectory
+	) {
 		const string fragmentPrefix = $"{nameof(StlTechRelGen)}.Resources.fragments.";
 		Assembly assembly = Assembly.GetExecutingAssembly();
 
@@ -139,18 +156,27 @@ public static class Program {
 			.DriveProgressTask(ctx.AddTask(Messages.Progress.WritingL10nFragments))
 			.Select(i => i[fragmentPrefix.Length..])
 			.ForEach(i => {
-				using Stream stream = assembly.GetManifestResourceStream(fragmentPrefix + i)!;
-				using FileStream file = File.Open(Path.Combine(outputDirectory.FullName, i), GlobalInstances.FileWriteOptions);
+				using Stream stream = assembly
+					.GetManifestResourceStream(fragmentPrefix + i)!;
+				using FileStream file = File.Open(
+					Path.Combine(outputDirectory.FullName, i),
+					GlobalInstances.FileWriteOptions
+				);
 				stream.CopyTo(file);
 			});
 	}
 
-	private static async Task<(string destPath, Mod[] sourceMods)> GetTarget(Config config) {
-		using LauncherV2DbContext db = await Inquiries.RunWithProgressAsync(Messages.Progress.ConnectingLauncherDb,
+	private static async Task<(string destPath, Mod[] sourceMods)> GetTarget(
+		Config config
+	) {
+		using LauncherV2DbContext db = await Inquiries.RunWithProgressAsync(
+			Messages.Progress.ConnectingLauncherDb,
 			() => new LauncherV2DbContext(config.Game)
 		);
 
-		if (TryRestoreSavedTarget(config, db, out string? destPath, out List<Mod>? mods)) {
+		if (TryRestoreSavedTarget(
+			config, db, out string? destPath, out List<Mod>? mods
+		)) {
 			return (destPath, [.. mods]);
 		}
 
@@ -182,14 +208,16 @@ public static class Program {
 			return true;
 		}
 
-		Playset? playset = db.Playsets.SingleOrDefault(i => i.Name == config.Playset!.Name);
+		Playset? playset = db.Playsets
+			.SingleOrDefault(i => i.Name == config.Playset!.Name);
 		if (playset == null) {
 			LogError(Messages.Error.PlaysetNotFound);
 			return false;
 		}
 
 		mods = [.. db.GetModsInPlayset(playset)];
-		Mod[] targetModCandidates = [.. mods.Where(i => i.DisplayName == config.Playset.Target)];
+		Mod[] targetModCandidates = [.. mods
+			.Where(i => i.DisplayName == config.Playset.Target)];
 		if (targetModCandidates.Length == 0) {
 			LogError(Messages.Error.TargetModNotFound);
 			return false;
@@ -197,7 +225,10 @@ public static class Program {
 			LogError(Messages.Error.MultipleModsSameName);
 			LogInfo(Messages.Prompt.TargetModCollisionHeader);
 			foreach (Mod candidate in targetModCandidates) {
-				LogInfo(Messages.Prompt.TargetModCollisionItem.Format(Markup.Escape(candidate.Path())));
+				LogInfo(
+					Messages.Prompt.TargetModCollisionItem
+						.Format(Markup.Escape(candidate.Path()))
+				);
 			}
 
 			return false;

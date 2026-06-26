@@ -3,10 +3,11 @@ using StlTechRelGen.Model;
 namespace StlTechRelGen;
 
 internal sealed class L10nBuilder(GameData gameData) {
-	public Dictionary<string, Dictionary<string, string>> Generated { get; } = LangHelpers.allSTLLangs.ToDictionary(
-		i => i.Name(),
-		_ => new Dictionary<string, string>()
-	);
+	public Dictionary<string, Dictionary<string, string>> Generated { get; } =
+		LangHelpers.allSTLLangs.ToDictionary(
+			i => i.Name(),
+			_ => new Dictionary<string, string>()
+		);
 
 	public void BuildTech(string id, Tech tech) {
 		StringBuilder sb = new(); // Holds metadata except areas, plus related techs
@@ -36,7 +37,10 @@ internal sealed class L10nBuilder(GameData gameData) {
 				if (require is TechRequirementSingle single) {
 					WriteRelatedTech(sb, single.Id, 1);
 				} else if (require is TechRequirementAlternatives alternatives) {
-					sb.Append(CultureInfo.InvariantCulture, $"\n$t${Constants.L10n.Bullet}{Constants.L10n.OneOf}");
+					sb.Append(
+						CultureInfo.InvariantCulture,
+						$"\n$t${Constants.L10n.Bullet}{Constants.L10n.OneOf}"
+					);
 					foreach (string alternative in alternatives.Alternatives) {
 						WriteRelatedTech(sb, alternative, 2);
 					}
@@ -53,28 +57,38 @@ internal sealed class L10nBuilder(GameData gameData) {
 			}
 		}
 
-		string contentMain = sb.ToString(); // This includes metadata that's not affected by swaps + relations
+		string contentMain = sb.ToString();
+		// This includes metadata that's not affected by swaps + relations
 		string descKey = $"{id}_desc";
 
-		// Treat the base tech as a swap of itself so the base entry and every real
-		// swap entry share one generation path. AsSwap() copies only area, categories,
-		// and vanilla — the three properties a technology_swap block may override.
-		foreach ((string swapId, TechSwap swapTech) in tech.Swaps.Prepend(new(id, tech.AsSwap()))) {
-			// Some metadata might be changed by swaps, generate individual copies for each swap
+		// Treat the base tech as a swap of itself so the base entry and
+		// every real swap entry share one generation path. AsSwap()
+		// copies only area, categories, and vanilla — the three
+		// properties a technology_swap block may override.
+		foreach ((string swapId, TechSwap swapTech) in
+			tech.Swaps.Prepend(new(id, tech.AsSwap()))
+		) {
+			// Some metadata might be changed by swaps, generate
+			// individual copies for each swap
 			string contentSwap = $"\n\n£{swapTech.Area.ToString().ToLowerInvariant()}£"
 				+ $" §Y${swapTech.Area.ToString().ToUpperInvariant()}$ "
 				+ $"T{tech.Tier}{Constants.L10n.LParen}"
-				+ swapTech.Categories.Select(i => $"${i.ToLowerInvariant()}$").Join(Constants.L10n.Sep)
+				+ swapTech.Categories.Select(
+					i => $"${i.ToLowerInvariant()}$"
+				).Join(Constants.L10n.Sep)
 				+ contentMain; // Add up with metadata that are affected by swaps
 
-			foreach ((CWLang lang, ReadOnlyDictionary<string, string> loc) in gameData.Localizations) {
+			foreach ((CWLang lang, ReadOnlyDictionary<string, string> loc) in
+				gameData.Localizations
+			) {
 				Dictionary<string, string> dict = Generated[lang.Name()];
 				foreach (string suffix in gameData.AuthSuffixes) {
 					string descKeySwap = $"{swapId}_desc";
 					string descKeySwapFull = $"{descKeySwap}{suffix}";
 
 					if (suffix.Length > 0 && !loc.ContainsKey(descKeySwapFull)) {
-						// suffix.Length > 0 => Auth specific desc (Since we always want basic desc)
+						// suffix.Length > 0 => Auth specific desc
+						// (Since we always want basic desc)
 						// ContainsKey false => This auth has no specific desc
 						continue;
 					}
@@ -92,7 +106,10 @@ internal sealed class L10nBuilder(GameData gameData) {
 							if (descKey == descKeySwapFull) {
 								LogWarning(Messages.Data.L10nEntryNotFound.Format(descKey));
 							} else {
-								LogWarning(Messages.Data.L10nEntryAndSwapNotFound.Format(descKey, descKeySwapFull));
+								LogWarning(
+									Messages.Data.L10nEntryAndSwapNotFound
+										.Format(descKey, descKeySwapFull)
+								);
 							}
 						}
 					}
@@ -129,10 +146,14 @@ internal sealed class L10nBuilder(GameData gameData) {
 
 					string descFinal = resolvedText + contentSwap;
 
-					// Skip if the final text is identical to the base (non-swap) entry.
-					// This commonly happens when authority-specific suffixes produce
-					// the same resolved description — writing duplicates would bloat output.
-					if (!dict.TryGetValue(descKey, out string? baseDesc) || baseDesc != descFinal) {
+					// Skip if the final text is identical to the base
+					// (non-swap) entry. This commonly happens when
+					// authority-specific suffixes produce the same
+					// resolved description — writing duplicates would
+					// bloat output.
+					if (!dict.TryGetValue(descKey, out string? baseDesc)
+						|| baseDesc != descFinal
+					) {
 						dict[descKeySwapFull] = descFinal;
 					}
 				}
@@ -158,7 +179,10 @@ internal sealed class L10nBuilder(GameData gameData) {
 			sb.Append(Constants.L10n.Mod);
 		}
 
-		sb.Append(CultureInfo.InvariantCulture, $"£{tech.Area.ToString().ToLowerInvariant()}£ ['technology:{relTechId}']");
+		sb.Append(CultureInfo.InvariantCulture,
+			$"£{tech.Area.ToString().ToLowerInvariant()}£"
+			+ $" ['technology:{relTechId}']"
+		);
 	}
 
 	// Scans text for $key$ references, separates them into resolvable and
@@ -206,7 +230,8 @@ internal sealed class L10nBuilder(GameData gameData) {
 	}
 
 	public void WriteFilesWithProgress(ProgressContext ctx, string destPath) {
-		ProgressTask task = ctx.AddTask(Messages.Progress.WritingL10n).MaxValue(Generated.Keys.Count);
+		ProgressTask task = ctx.AddTask(Messages.Progress.WritingL10n)
+			.MaxValue(Generated.Keys.Count);
 		Parallel.ForEach(Generated.Keys, (lang) => {
 			WriteLangFile(destPath, lang);
 			task.Increment(1);
@@ -234,7 +259,9 @@ internal sealed class L10nBuilder(GameData gameData) {
 			writer.Write(' ');
 			writer.Write(key);
 			writer.Write(": ");
-			writer.Write(GlobalInstances.Yaml.Serializer.Serialize(value)); // Serializer produces \n
+			writer.Write(
+				GlobalInstances.Yaml.Serializer.Serialize(value)
+			); // Serializer produces \n
 		}
 	}
 }

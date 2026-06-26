@@ -9,8 +9,10 @@ namespace StlTechRelGen;
 internal static class Inquiries {
 	private const string LAUNCHER_PROC_NAME = "paradox launcher";
 
-	// Workaround for collision between class Spectre.Console.Markup and method Spectre.Console.AnsiConsole.Markup
-	private static string Escape(string text) => Spectre.Console.Markup.Escape(text);
+	// Workaround for collision between class Spectre.Console.Markup
+	// and method Spectre.Console.AnsiConsole.Markup
+	private static string Escape(string text) =>
+		Spectre.Console.Markup.Escape(text);
 
 	internal static void Pause() {
 		Prompt(new TextPrompt<string>(Messages.Prompt.Pause)
@@ -19,11 +21,15 @@ internal static class Inquiries {
 		WriteLine();
 	}
 
-	public static async Task<T> RunWithProgressAsync<T>(string desc, Func<T> func) => await Progress()
+	public static async Task<T> RunWithProgressAsync<T>(
+		string desc, Func<T> func
+	) => await Progress()
 		.UsePreset()
 		.StartAsync(async (ctx) => RunWithProgress(ctx, desc, func));
 
-	public static T RunWithProgress<T>(ProgressContext ctx, string desc, Func<T> func) {
+	public static T RunWithProgress<T>(
+		ProgressContext ctx, string desc, Func<T> func
+	) {
 		ProgressTask task = ctx.AddTask(desc).IsIndeterminate().MaxValue(1);
 		T result = func();
 		task.Value(1).StopTask();
@@ -32,7 +38,10 @@ internal static class Inquiries {
 
 	internal static void WaitForLauncherClose(Config config) {
 		static bool IsLauncherOpen() => Process.GetProcesses()
-			.Any(i => i.ProcessName.Equals(LAUNCHER_PROC_NAME, StringComparison.OrdinalIgnoreCase));
+			.Any(i => i.ProcessName.Equals(
+				LAUNCHER_PROC_NAME,
+				StringComparison.OrdinalIgnoreCase
+			));
 
 		if (IsLauncherOpen()) {
 			MarkupLine(Messages.Prompt.CloseLauncher);
@@ -65,7 +74,10 @@ internal static class Inquiries {
 		);
 	}
 
-	internal static (string destPath, Mod[] mods) SelectOutputTarget(Config config, LauncherV2DbContext db) {
+	internal static (string destPath, Mod[] mods) SelectOutputTarget(
+		Config config,
+		LauncherV2DbContext db
+	) {
 		List<Mod> mods;
 		string destPath;
 
@@ -87,30 +99,39 @@ internal static class Inquiries {
 		return (destPath, [.. mods]);
 	}
 
-	private static Playset SelectPlayset(LauncherV2DbContext db) => Prompt(new SelectionPrompt<Playset>()
-		.UsePreset()
-		.Title(Messages.Prompt.ChoosePlayset)
-		.AddChoices(db.Playsets.OrderByDescending(i => i.IsActive))
-		.AddCancelResult(new Playset() { Name = "", IsActive = false })
-		.UseConverter(i => i.IsActive ?? false
-			? Messages.Prompt.CurrentPlaysetPrefix + Escape(i.Name)
-			: Escape(i.Name)
-		)
-	);
+	private static Playset SelectPlayset(LauncherV2DbContext db) =>
+		Prompt(new SelectionPrompt<Playset>()
+			.UsePreset()
+			.Title(Messages.Prompt.ChoosePlayset)
+			.AddChoices(db.Playsets.OrderByDescending(i => i.IsActive))
+			.AddCancelResult(new Playset() { Name = "", IsActive = false })
+			.UseConverter(i => i.IsActive ?? false
+				? Messages.Prompt.CurrentPlaysetPrefix + Escape(i.Name)
+				: Escape(i.Name)
+			)
+		);
 
 	internal static string PromptOutputPath() =>
 		Path.GetFullPath(Ask<string>(Messages.Prompt.AskOutputPath));
 
-	internal static Mod SelectTargetMod(IEnumerable<Mod> mods) => Prompt(new SelectionPrompt<Mod>()
-		.UsePreset()
-		.Title(Messages.Prompt.ChooseTargetMod)
-		.AddChoices(mods)
-		.PageSize(8)
-		.EnableSearch()
-		.UseConverter(i => $"[white]{Escape(i.DisplayName!)}[/] [dim]({Escape(i.Path())})[/]")
-	);
+	internal static Mod SelectTargetMod(IEnumerable<Mod> mods) =>
+		Prompt(new SelectionPrompt<Mod>()
+			.UsePreset()
+			.Title(Messages.Prompt.ChooseTargetMod)
+			.AddChoices(mods)
+			.PageSize(8)
+			.EnableSearch()
+			.UseConverter(i =>
+				$"[white]{Escape(i.DisplayName!)}[/]"
+				+ $" [dim]({Escape(i.Path())})[/]"
+			)
+		);
 
-	internal static void SaveTargetIfConfirmed(Config config, string playsetName, string targetModName) {
+	internal static void SaveTargetIfConfirmed(
+		Config config,
+		string playsetName,
+		string targetModName
+	) {
 		if (!config.Yesmen && !Confirm((
 			string.IsNullOrEmpty(playsetName)
 				? Messages.Prompt.ConfirmSaveVanilla

@@ -13,9 +13,15 @@ internal sealed class TechSwap(
 	// block omits it, via UnwrapOr(). This mirrors Stellaris's own
 	// inheritance rule: an unset swap property inherits from the owning
 	// technology.
-	public static TechSwap Parse(CWNode node, CWComparer cwComparer, Tech parent) => new(
+	public static TechSwap Parse(
+		CWNode node, CWComparer cwComparer, Tech parent
+	) => new(
 		cwComparer.IsVanilla(node.Position),
-		node.Tag("area").Map(x => Enum.Parse<TechArea>(x.ToRawString(), true)).UnwrapOr(parent.Area),
-		node.Child("category").Map(x => x.LeafValues.Select(i => i.ValueText).ToList()).UnwrapOr(parent.Categories)
+		node.Tag("area")
+			.Map(x => Enum.Parse<TechArea>(x.ToRawString(), true))
+			.UnwrapOr(parent.Area),
+		node.Child("category")
+			.Map(x => x.LeafValues.Select(i => i.ValueText).ToList())
+			.UnwrapOr(parent.Categories)
 	);
 }
