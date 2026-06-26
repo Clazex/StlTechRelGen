@@ -6,7 +6,8 @@ namespace StlTechRelGen;
 internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 	private sealed class ReleaseInfo {
 		public string TagName { get; set; } = null!;
-		public string HtmlUrl { get; set; } = null!; // Actually is Uri, but there's no need to validate
+		// Actually is Uri, but there's no need to validate
+		public string HtmlUrl { get; set; } = null!;
 		public DateTime CreatedAt { get; set; }
 		public string Body { get; set; } = null!;
 	}
@@ -28,7 +29,9 @@ internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 			return;
 		}
 
-		AnsiConsole.MarkupLine(Messages.Update.NewVersionFound.FormatLocal(release.HtmlUrl, release.TagName, release.CreatedAt));
+		AnsiConsole.MarkupLine(Messages.Update.NewVersionFound.FormatLocal(
+			release.HtmlUrl, release.TagName, release.CreatedAt)
+		);
 		if (!string.IsNullOrWhiteSpace(release.Body)) {
 			AnsiConsole.MarkupLine(Messages.Update.ReleaseBody.Format(release.Body));
 		}

@@ -158,7 +158,12 @@ public static class Program {
 	}
 
 
-	private static bool TryRestoreSavedTarget(Config config, LauncherV2DbContext db, [NotNullWhen(true)] out string? destPath, [NotNullWhen(true)] out List<Mod>? mods) {
+	private static bool TryRestoreSavedTarget(
+		Config config,
+		LauncherV2DbContext db,
+		[NotNullWhen(true)] out string? destPath,
+		[NotNullWhen(true)] out List<Mod>? mods
+	) {
 		destPath = null;
 		mods = null;
 

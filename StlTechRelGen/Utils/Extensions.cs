@@ -85,7 +85,10 @@ internal static class Extensions {
 			return list;
 		}
 
-		public Dictionary<TKey, TValue> ToDictionaryOverwriting<TKey, TValue>(Func<T, TKey> keySelector, Func<T, TValue> valueSelector) where TKey : notnull {
+		public Dictionary<TKey, TValue> ToDictionaryOverwriting<TKey, TValue>(
+			Func<T, TKey> keySelector,
+			Func<T, TValue> valueSelector
+		) where TKey : notnull {
 			Dictionary<TKey, TValue> dict = [];
 
 			IEnumerator<T> enumerator = self.GetEnumerator();

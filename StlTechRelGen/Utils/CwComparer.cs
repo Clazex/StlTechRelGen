@@ -2,7 +2,12 @@ using static CWTools.Games.Files;
 
 namespace StlTechRelGen.Utils;
 
-internal sealed class CWComparer(WorkspaceDirectory GameDir, WorkspaceDirectoryInput[] ModDirs) : IComparer<CWNode>, IComparer<CWTools.Localisation.Entry>, IComparer<CWRange> {
+internal sealed class CWComparer(
+	WorkspaceDirectory GameDir,
+	WorkspaceDirectoryInput[] ModDirs
+) : IComparer<CWNode>,
+	IComparer<CWTools.Localisation.Entry>,
+	IComparer<CWRange> {
 	public string GamePath => GameDir.path;
 
 	public string[] ModPaths { get; } = [.. ModDirs.Select(

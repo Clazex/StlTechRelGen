@@ -29,10 +29,14 @@ internal sealed class CliArgs : Command<CliArgs.Settings> {
 		public Config ToConfig() => new() {
 			Yesmen = true,
 			Game = new Config.GameConfig {
-				GamePath = GamePath ?? GameFinder.Find() ??
-					throw new NotSupportedException("Game path is not provided and failed to be found automatically"),
-				DocumentPath = DocumentPath ?? Constants.DefaultDocumentPath ??
-					throw new NotSupportedException("Document path is not provided and cannot be determined automatically for this OS"),
+				GamePath = GamePath ?? GameFinder.Find()
+					?? throw new NotSupportedException(
+						"Game path is not provided and failed to be found automatically"
+					),
+				DocumentPath = DocumentPath ?? Constants.DefaultDocumentPath
+					?? throw new NotSupportedException(
+						"Document path is not provided and cannot be determined automatically for this OS"
+					),
 			},
 			Playset = new Config.PlaysetConfig {
 				Name = Playset,

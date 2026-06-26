@@ -32,7 +32,11 @@ internal sealed class Tech(
 	// scripted variable reference. The @ prefix denotes a lookup into
 	// common/scripted_variables/. Anything that is neither a plain
 	// integer nor a @-prefixed variable reference is illegal and throws.
-	private static int ParseIntOrVariable(string fieldValue, string fieldName, IReadOnlyDictionary<string, CWValue> variables) {
+	private static int ParseIntOrVariable(
+		string fieldValue,
+		string fieldName,
+		IReadOnlyDictionary<string, CWValue> variables
+	) {
 		if (int.TryParse(fieldValue, out int result)) {
 			return result;
 		}
@@ -73,7 +77,11 @@ internal sealed class Tech(
 		// instances, carrying the original AND/OR semantics downstream.
 		List<TechRequirement> requires = node.Child("prerequisites")
 			.Map(x => {
-				List<TechRequirement> list = [.. x.LeafValues.Select(x => new TechRequirementSingle(x.Value.ToRawString()))];
+				List<TechRequirement> list = [
+					.. x.LeafValues.Select(
+						x => new TechRequirementSingle(x.Value.ToRawString())
+					),
+				];
 
 				foreach (CWNode clause in x.Children) {
 					if (!string.Equals(clause.Key, "OR", StringComparison.OrdinalIgnoreCase)) {

@@ -76,7 +76,10 @@ internal sealed class GameData {
 			.Select(i => $"common/{i}/")
 			// Along with other hardcoded dirs that will be read by CWTools
 			// https://github.com/cwtools/cwtools/blob/b377453dee803f9258be92cfc49896d09039702d/CWTools/Common/STLConstants.fs#L156-L170
-			.Concat(["events/", "flags/", "fonts/", "gfx/", "interface/", "map/", "music/", "prescripted_countries/", "sound/"])
+			.Concat([
+				"events/", "flags/", "fonts/", "gfx/", "interface/",
+				"map/", "music/", "prescripted_countries/", "sound/",
+			])
 			.ToFSharpList();
 
 		CWTools.Games.Stellaris.STLGame stellaris = new(new GameSetupSettings<STLLookup>(
@@ -104,7 +107,11 @@ internal sealed class GameData {
 		Entities = new(Game.Resources.AllEntities.Invoke(null));
 	}
 
-	public static GameData LoadWithProgress(ProgressContext ctx, Config config, IEnumerable<(string name, string path)> mods) {
+	public static GameData LoadWithProgress(
+		ProgressContext ctx,
+		Config config,
+		IEnumerable<(string name, string path)> mods
+	) {
 		GameData gameData = Inquiries.RunWithProgress(
 			ctx,
 			Messages.Progress.LoadingGame,
