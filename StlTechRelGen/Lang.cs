@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 using Tomlyn;
 
 namespace StlTechRelGen;
@@ -15,14 +13,10 @@ internal sealed class Lang {
 		_ => DEFAULT_LANG
 	});
 
-	internal static void LoadMessages(string? lang) => Messages = TomlSerializer.Deserialize<Lang>(
+	internal static void LoadMessages(string? lang) => Messages = TomlSerializer.Deserialize(
 		Assembly.GetExecutingAssembly()
 			.GetManifestResourceStream($"{nameof(StlTechRelGen)}.Resources.lang.{lang}.toml")!,
-		// TomlContext.Default // Source generation has some issues with converters (https://github.com/xoofx/Tomlyn/issues/132)
-		new TomlSerializerOptions() { // Use reflection-based for now
-			PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-			Converters = [new TomlContext.CompositeFormatConverter()]
-		}
+		TomlContext.Default.Lang
 	)!;
 
 	public required PromptMessages Prompt { get; init; }
