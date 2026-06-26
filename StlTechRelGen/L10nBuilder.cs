@@ -28,19 +28,18 @@ internal sealed class L10nBuilder(GameData gameData) {
 			}
 		}
 
-		sb.Append(CultureInfo.InvariantCulture, $"{Constants.L10n.RParen}§!");
+		sb.Append(Constants.L10n.RParen).Append("§!");
 
 
 		if (tech.Requires.Count > 0) {
-			sb.Append($"\n\n{Constants.L10n.Requires}");
+			sb.Append("\n\n").Append(Constants.L10n.Requires);
 			foreach (TechRequirement require in tech.Requires) {
 				if (require is TechRequirementSingle single) {
 					WriteRelatedTech(sb, single.Id, 1);
 				} else if (require is TechRequirementAlternatives alternatives) {
-					sb.Append(
-						CultureInfo.InvariantCulture,
-						$"\n$t${Constants.L10n.Bullet}{Constants.L10n.OneOf}"
-					);
+					sb.Append("\n$t$")
+						.Append(Constants.L10n.Bullet)
+						.Append(Constants.L10n.OneOf);
 					foreach (string alternative in alternatives.Alternatives) {
 						WriteRelatedTech(sb, alternative, 2);
 					}
@@ -51,7 +50,7 @@ internal sealed class L10nBuilder(GameData gameData) {
 		}
 
 		if (tech.Unlocks.Count > 0) {
-			sb.Append($"\n\n{Constants.L10n.Unlocks}");
+			sb.Append("\n\n").Append(Constants.L10n.Unlocks);
 			foreach (string unlock in tech.Unlocks) {
 				WriteRelatedTech(sb, unlock, 1);
 			}
@@ -179,10 +178,12 @@ internal sealed class L10nBuilder(GameData gameData) {
 			sb.Append(Constants.L10n.Mod);
 		}
 
-		sb.Append(CultureInfo.InvariantCulture,
-			$"£{tech.Area.ToString().ToLowerInvariant()}£"
-			+ $" ['technology:{relTechId}']"
-		);
+		sb.Append('£')
+			.Append(tech.Area.ToString().ToLowerInvariant())
+			.Append('£')
+			.Append(" ['technology:")
+			.Append(relTechId)
+			.Append("']");
 	}
 
 	// Scans text for $key$ references, separates them into resolvable and
