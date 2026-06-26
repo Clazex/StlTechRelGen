@@ -95,7 +95,7 @@ public static class Program {
 				);
 			});
 
-		AnsiConsole.MarkupLine(Messages.Prompt.SavedLocalization.Format(countL10nFiles, l10nDir.FullName));
+		AnsiConsole.MarkupLine(Messages.Prompt.SavedL10n.Format(countL10nFiles, l10nDir.FullName));
 		AnsiConsole.MarkupLine(Messages.Prompt.GenerationSummary.Format(countRelations, countTechs));
 		if (!config.Yesmen) {
 			Inquiries.Pause();
@@ -124,7 +124,7 @@ public static class Program {
 	private static L10nBuilder BuildL10n(ProgressContext ctx, GameData gameData) {
 		L10nBuilder l10nBuilder = new(gameData);
 		gameData.TechTable.Techs
-			.DriveProgressTask(ctx.AddTask(Messages.Progress.GeneratingLocalization))
+			.DriveProgressTask(ctx.AddTask(Messages.Progress.GeneratingL10n))
 			.ForEach(i => l10nBuilder.BuildTech(i.Key, i.Value));
 		return l10nBuilder;
 	}
@@ -136,7 +136,7 @@ public static class Program {
 		assembly
 			.GetManifestResourceNames()
 			.Where(i => i.StartsWith(fragmentPrefix, StringComparison.Ordinal))
-			.DriveProgressTask(ctx.AddTask(Messages.Progress.WritingLocalizationFragments))
+			.DriveProgressTask(ctx.AddTask(Messages.Progress.WritingL10nFragments))
 			.Select(i => i[fragmentPrefix.Length..])
 			.ForEach(i => {
 				using Stream stream = assembly.GetManifestResourceStream(fragmentPrefix + i)!;
@@ -190,9 +190,9 @@ public static class Program {
 			return false;
 		} else if (targetModCandidates.Length > 1) {
 			LogError(Messages.Error.MultipleModsSameName);
-			LogInfo(Messages.Prompt.CollidingTargetModListHeader);
+			LogInfo(Messages.Prompt.TargetModCollisionHeader);
 			foreach (Mod candidate in targetModCandidates) {
-				LogInfo(Messages.Prompt.CollidingTargetModListItem.Format(Markup.Escape(candidate.Path())));
+				LogInfo(Messages.Prompt.TargetModCollisionItem.Format(Markup.Escape(candidate.Path())));
 			}
 
 			return false;

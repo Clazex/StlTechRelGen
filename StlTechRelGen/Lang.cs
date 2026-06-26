@@ -53,12 +53,12 @@ internal sealed class Lang {
 		public required string CurrentPlaysetPrefix { get; init; }
 		public required string AskOutputPath { get; init; }
 		public required string ChooseTargetMod { get; init; }
-		public required string CollidingTargetModListHeader { get; init; }
-		public required CompositeFormat CollidingTargetModListItem { get; init; }
+		public required string TargetModCollisionHeader { get; init; }
+		public required CompositeFormat TargetModCollisionItem { get; init; }
 		public required CompositeFormat ConfirmSaveVanilla { get; init; }
 		public required CompositeFormat ConfirmSaveTarget { get; init; }
 
-		public required CompositeFormat SavedLocalization { get; init; }
+		public required CompositeFormat SavedL10n { get; init; }
 		public required CompositeFormat GenerationSummary { get; init; }
 	}
 
@@ -69,18 +69,18 @@ internal sealed class Lang {
 		public required string LoadingAuthoritySuffixes { get; init; }
 		public required string LoadingTechnologies { get; init; }
 		public required string BuildingTechRelationship { get; init; }
-		public required string LoadingLocalization { get; init; }
-		public required string GeneratingLocalization { get; init; }
-		public required string WritingLocalizationFragments { get; init; }
-		public required string WritingLocalization { get; init; }
+		public required string LoadingL10n { get; init; }
+		public required string GeneratingL10n { get; init; }
+		public required string WritingL10nFragments { get; init; }
+		public required string WritingL10n { get; init; }
 	}
 
 	internal sealed class DataMessages {
-		public required CompositeFormat LocalizationEntryNotFound { get; init; }
-		public required CompositeFormat LocalizationEntryAndSwapNotFound { get; init; }
+		public required CompositeFormat L10nEntryNotFound { get; init; }
+		public required CompositeFormat L10nEntryAndSwapNotFound { get; init; }
 		public required CompositeFormat TechUnknownPrereq { get; init; }
 		public required CompositeFormat TechUnnamedSwap { get; init; }
-		public required CompositeFormat LocalizationCycleReference { get; init; }
+		public required CompositeFormat L10nCycleReference { get; init; }
 	}
 
 	internal sealed class UpdateMessages {

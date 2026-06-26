@@ -90,9 +90,9 @@ internal sealed class L10nBuilder(GameData gameData) {
 							descOrig = descKeySwapFull;
 
 							if (descKey == descKeySwapFull) {
-								LogWarning(Messages.Data.LocalizationEntryNotFound.Format(descKey));
+								LogWarning(Messages.Data.L10nEntryNotFound.Format(descKey));
 							} else {
-								LogWarning(Messages.Data.LocalizationEntryAndSwapNotFound.Format(descKey, descKeySwapFull));
+								LogWarning(Messages.Data.L10nEntryAndSwapNotFound.Format(descKey, descKeySwapFull));
 							}
 						}
 					}
@@ -120,7 +120,7 @@ internal sealed class L10nBuilder(GameData gameData) {
 						// resolution → circular chain (A→B→A or A→A self-ref).
 						// Stop to avoid infinite loop; remaining refs stay as-is.
 						if (keysFound.Intersect(keysResolved).Any()) {
-							LogWarning(Messages.Data.LocalizationCycleReference.Format(descKeyFinal));
+							LogWarning(Messages.Data.L10nCycleReference.Format(descKeyFinal));
 							break;
 						}
 
@@ -206,7 +206,7 @@ internal sealed class L10nBuilder(GameData gameData) {
 	}
 
 	public void WriteFilesWithProgress(ProgressContext ctx, string destPath) {
-		ProgressTask task = ctx.AddTask(Messages.Progress.WritingLocalization).MaxValue(Generated.Keys.Count);
+		ProgressTask task = ctx.AddTask(Messages.Progress.WritingL10n).MaxValue(Generated.Keys.Count);
 		Parallel.ForEach(Generated.Keys, (lang) => {
 			WriteLangFile(destPath, lang);
 			task.Increment(1);

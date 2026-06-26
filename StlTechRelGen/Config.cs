@@ -57,6 +57,7 @@ internal sealed partial class Config {
 			LogError(Messages.Error.ConfigParseFailed);
 			AnsiConsole.WriteException(e, ExceptionFormats.NoStackTrace);
 			LogWarning(Messages.Prompt.GenerateNewConfig);
+			AnsiConsole.WriteLine();
 			return null;
 		}
 	}

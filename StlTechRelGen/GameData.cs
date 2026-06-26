@@ -168,8 +168,8 @@ internal sealed class GameData {
 		.AsReadOnly();
 
 	private void LoadLocalization(ProgressContext ctx) {
-		ConcurrentDictionary<CWTools.Common.Lang, ReadOnlyDictionary<string, string>> L10n = new();
-		ProgressTask task = ctx.AddTask(Messages.Progress.LoadingLocalization)
+		ConcurrentDictionary<CWLang, ReadOnlyDictionary<string, string>> L10n = new();
+		ProgressTask task = ctx.AddTask(Messages.Progress.LoadingL10n)
 			.MaxValue(Game.LocalisationManager.LocalisationEntries().Length);
 
 		Parallel.ForEach(Game.LocalisationManager.LocalisationEntries(), (x) => {
