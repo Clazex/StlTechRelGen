@@ -1,6 +1,6 @@
 using GameFinder.RegistryUtils;
-using GameFinder.StoreHandlers.Steam;
 using GameFinder.StoreHandlers.GOG;
+using GameFinder.StoreHandlers.Steam;
 using GameFinder.Wine;
 using GameFinder.Wine.Bottles;
 
