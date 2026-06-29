@@ -1,25 +1,40 @@
 <Project Sdk="Microsoft.NET.Sdk">
+	<!-- Assembly Identity -->
 	<PropertyGroup>
-		<Version>0.1.0</Version> <!--
+		<!--
 			This is used by update checker, and therefore must be
-			the same as git tag name with no "v" prefix
+			the same as git tag name but with no "v" prefix
 		-->
+		<Version>0.1.0</Version>
 		<RootNamespace>StlTechRelGen</RootNamespace>
+		<AssemblyTitle>Stellaris Tech Relation Generator</AssemblyTitle>
+		<Product>$(AssemblyTitle)</Product>
+		<Description>Generates augment info for Stellaris techs from game data with mod support</Description>
+		<Company>Clazex</Company>
+		<Copyright>Copyright (c) 2026 Clazex</Copyright>
+	</PropertyGroup>
 
+	<!-- Language & Analysis -->
+	<PropertyGroup>
 		<LangVersion>preview</LangVersion>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-		<RestoreLockedMode Condition="'$(CI)' == 'true'">True</RestoreLockedMode>
-
 		<AnalysisMode>Recommended</AnalysisMode>
 		<NoWarn>$(NoWarn);CA1716</NoWarn> <!-- Suppression: mod is reserved keyword -->
+	</PropertyGroup>
 
+	<!-- Build -->
+	<PropertyGroup>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0</TargetFramework>
 		<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
 		<DebugType>portable</DebugType>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	</PropertyGroup>
 
+	<!-- Publish -->
+	<PropertyGroup>
 		<PublishSingleFile>false</PublishSingleFile>
 		<SelfContained>false</SelfContained>
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
@@ -28,6 +43,11 @@
 	<PropertyGroup Condition="$(Configuration) == 'Release'">
 		<PathMap>$(MSBuildProjectDirectory)=/</PathMap>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(CI)' == 'true'">
+		<RestoreLockedMode>True</RestoreLockedMode>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
