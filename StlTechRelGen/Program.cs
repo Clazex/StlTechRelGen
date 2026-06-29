@@ -102,7 +102,7 @@ public static class Program {
 				);
 			});
 
-		Log(Messages.Prompt.SavedL10n, countL10nFiles, l10nDir.FullName);
+		Log(Messages.Prompt.SavedL10n, countL10nFiles, Markup.Escape(l10nDir.FullName));
 		Log(Messages.Prompt.GenerationSummary, countRelations, countTechs);
 		if (!config.Yesmen) {
 			Inquiries.Pause();
@@ -112,17 +112,17 @@ public static class Program {
 	}
 
 
-	private static void PrepareOutputDir(DirectoryInfo outputDirectory) {
+	private static void PrepareOutputDir(DirectoryInfo outputDir) {
 		try {
-			if (outputDirectory.Exists) {
-				outputDirectory.Delete(true);
+			if (outputDir.Exists) {
+				outputDir.Delete(true);
 			}
 
-			outputDirectory.Create();
+			outputDir.Create();
 		} catch {
 			LogError(
 				Messages.Error.FailedToAccessOutputDir,
-				outputDirectory.FullName
+				Markup.Escape(outputDir.FullName)
 			);
 			throw;
 		}
