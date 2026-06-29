@@ -33,7 +33,7 @@
 		<PackageReference Include="CWTools" Version="0.5.0-alpha" />
 		<PackageReference Include="FSharp.Core" Version="10.1.301" />
 
-		<PackageReference Include="Tomlyn" Version="2.8.0" />
+		<PackageReference Include="Tomlyn" Version="2.9.0" />
 		<PackageReference Include="YamlDotNet" Version="18.0.0" />
 
 		<PackageReference Include="GameFinder" Version="4.9.0" />
@@ -51,7 +51,7 @@
 		-->
 		<PackageReference Include="SourceGear.sqlite3" Version="3.50.4.5" />
 
-		<PackageReference Include="Spectre.Console" Version="0.57.0" />
+		<PackageReference Include="Spectre.Console" Version="0.57.1" />
 		<PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
 	</ItemGroup>
 
