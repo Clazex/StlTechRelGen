@@ -116,7 +116,7 @@ internal sealed class Tech(
 		);
 		foreach (CWNode swapNode in node.Childs("technology_swap")) {
 			if (OptionModule.IsNone(swapNode.Tag("name"))) {
-				LogError(Messages.Data.TechUnnamedSwap.Format(node.Key));
+				LogError(Messages.Data.TechUnnamedSwap, node.Key);
 				continue;
 			}
 

@@ -99,22 +99,25 @@ internal sealed class L10nBuilder(GameData gameData) {
 						descKeyFinal = descKey;
 						if (!loc.TryGetValue(descKey, out descOrig)) {
 							// Loc not found, use key directly
-							// We don't skip directly in order to provide info at best-effort
+							// We don't skip directly in order to provide info
+							// at best-effort
 							descOrig = descKeySwapFull;
 
 							if (descKey == descKeySwapFull) {
-								LogWarning(Messages.Data.L10nEntryNotFound.Format(descKey));
+								LogWarning(Messages.Data.L10nEntryNotFound, descKey);
 							} else {
 								LogWarning(
-									Messages.Data.L10nEntryAndSwapNotFound
-										.Format(descKey, descKeySwapFull)
+									Messages.Data.L10nEntryAndSwapNotFound,
+									descKey,
+									descKeySwapFull
 								);
 							}
 						}
 					}
 
-					// Repeatedly resolve $key$ references until stable. A resolved
-					// description may itself introduce new references (rare case).
+					// Repeatedly resolve $key$ references until stable. A
+					// resolved description may itself introduce new references
+					// (rare case).
 					// keysResolved is used to detect circular references.
 					HashSet<string> keysResolved = [];
 					string resolvedText = descOrig;
@@ -126,17 +129,22 @@ internal sealed class L10nBuilder(GameData gameData) {
 							gameData.AuthSuffixes
 						);
 
-						// No loc keys found → all references resolved transitively.
+						// No loc keys found → all references resolved
+						// transitively.
 						// Also covers the case where descOrig had zero refs.
 						if (keysFound.Length == 0) {
 							break;
 						}
 
-						// A key resolved in an earlier iteration reappeared after
-						// resolution → circular chain (A→B→A or A→A self-ref).
-						// Stop to avoid infinite loop; remaining refs stay as-is.
+						// A key resolved in an earlier iteration reappeared
+						// after resolution → circular chain (A→B→A or A→A
+						// self-ref). Stop to avoid infinite loop; remaining
+						// refs stay as-is.
 						if (keysFound.Intersect(keysResolved).Any()) {
-							LogWarning(Messages.Data.L10nCycleReference.Format(descKeyFinal));
+							LogWarning(
+								Messages.Data.L10nCycleReference,
+								descKeyFinal
+							);
 							break;
 						}
 

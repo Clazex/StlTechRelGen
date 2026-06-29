@@ -81,6 +81,7 @@ public static class Program {
 			.StartAsync(async (ctx) => {
 				GameData gameData = LoadGameData(ctx, config, mods);
 				L10nBuilder l10nBuilder = BuildL10n(ctx, gameData);
+
 				WriteL10nFragments(ctx, l10nDir);
 				l10nBuilder.WriteFilesWithProgress(
 					ctx,
@@ -99,12 +100,8 @@ public static class Program {
 				);
 			});
 
-		AnsiConsole.MarkupLine(
-			Messages.Prompt.SavedL10n.Format(countL10nFiles, l10nDir.FullName)
-		);
-		AnsiConsole.MarkupLine(
-			Messages.Prompt.GenerationSummary.Format(countRelations, countTechs)
-		);
+		Log(Messages.Prompt.SavedL10n, countL10nFiles, l10nDir.FullName);
+		Log(Messages.Prompt.GenerationSummary, countRelations, countTechs);
 		if (!config.Yesmen) {
 			Inquiries.Pause();
 		}
@@ -121,8 +118,10 @@ public static class Program {
 
 			outputDirectory.Create();
 		} catch {
-			LogError(Messages.Error.FailedToAccessOutputDir
-				.Format(outputDirectory.FullName));
+			LogError(
+				Messages.Error.FailedToAccessOutputDir,
+				outputDirectory.FullName
+			);
 			throw;
 		}
 	}
@@ -223,11 +222,11 @@ public static class Program {
 			return false;
 		} else if (targetModCandidates.Length > 1) {
 			LogError(Messages.Error.MultipleModsSameName);
-			LogInfo(Messages.Prompt.TargetModCollisionHeader);
+			Log(Messages.Prompt.TargetModCollisionHeader);
 			foreach (Mod candidate in targetModCandidates) {
-				LogInfo(
-					Messages.Prompt.TargetModCollisionItem
-						.Format(Markup.Escape(candidate.Path()))
+				Log(
+					Messages.Prompt.TargetModCollisionItem,
+					Markup.Escape(candidate.Path())
 				);
 			}
 

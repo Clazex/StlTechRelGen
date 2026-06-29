@@ -19,7 +19,7 @@ internal sealed class TechTable {
 					if (dict.TryGetValue(reqId, out Tech? reqTech)) {
 						reqTech.Unlocks.Add(id);
 					} else {
-						LogWarning(Messages.Data.TechUnknownPrereq.Format(id, reqId));
+						LogWarning(Messages.Data.TechUnknownPrereq, id, reqId);
 					}
 				}
 			}

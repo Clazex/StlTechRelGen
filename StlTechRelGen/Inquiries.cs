@@ -44,7 +44,7 @@ internal static class Inquiries {
 			));
 
 		if (IsLauncherOpen()) {
-			MarkupLine(Messages.Prompt.CloseLauncher);
+			Log(Messages.Prompt.CloseLauncher);
 		} else {
 			return;
 		}
@@ -152,8 +152,8 @@ internal static class Inquiries {
 	}
 
 	internal static Config RunSetupWizard() {
-		MarkupLine(Messages.Prompt.Welcome);
-		MarkupLine(Messages.Prompt.ReadInstructions);
+		Log(Messages.Prompt.Welcome);
+		Log(Messages.Prompt.ReadInstructions);
 		Pause();
 
 		Config config = new() {
@@ -179,7 +179,7 @@ internal static class Inquiries {
 
 		config.Game.DocumentPath = Path.GetFullPath(Prompt(promptDocumentPath));
 
-		MarkupLine(Messages.Prompt.ConfigCreated);
+		Log(Messages.Prompt.ConfigCreated);
 
 		return config;
 	}

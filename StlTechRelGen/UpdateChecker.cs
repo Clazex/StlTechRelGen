@@ -36,7 +36,7 @@ internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 			release.HtmlUrl, release.TagName, release.CreatedAt)
 		);
 		if (!string.IsNullOrWhiteSpace(release.Body)) {
-			AnsiConsole.MarkupLine(Messages.Update.ReleaseBody.Format(release.Body));
+			Log(Messages.Update.ReleaseBody, release.Body);
 		}
 	}
 
