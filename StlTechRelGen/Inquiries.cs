@@ -132,10 +132,11 @@ internal static class Inquiries {
 		string playsetName,
 		string targetModName
 	) {
-		if (!config.Yesmen && !Confirm((
-			string.IsNullOrEmpty(playsetName)
-				? Messages.Prompt.ConfirmSaveVanilla
-				: Messages.Prompt.ConfirmSaveTarget
+		if (!config.Yesmen && !Confirm(
+			(
+				string.IsNullOrEmpty(playsetName)
+					? Messages.Prompt.ConfirmSaveVanilla
+					: Messages.Prompt.ConfirmSaveTarget
 			).Format(
 				Escape(playsetName),
 				Escape(targetModName)

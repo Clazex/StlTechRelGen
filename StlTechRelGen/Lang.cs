@@ -12,7 +12,8 @@ internal sealed class Lang {
 			"en" => "en",
 			"zh" => "zh",
 			_ => DEFAULT_LANG
-		});
+		}
+	);
 
 	internal static void LoadMessages(string? lang) =>
 		Messages = TomlSerializer.Deserialize(

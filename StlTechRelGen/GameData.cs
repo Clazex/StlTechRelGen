@@ -60,9 +60,9 @@ internal sealed class GameData {
 		ModDirs = [..mods.Select(i => {
 			string path = Path.GetFullPath(i.path);
 			if (Directory.Exists(path)) {
-				return WorkspaceDirectoryInput.NewWD(new WorkspaceDirectory(
-					path, i.name
-				));
+				return WorkspaceDirectoryInput.NewWD(
+					new WorkspaceDirectory(path, i.name)
+				);
 			} else if (File.Exists(path) && Path.GetExtension(path) == ".zip") {
 				string root = path.Replace('\\', '/');
 				using ZipArchive archive = ZipFile.OpenRead(path);

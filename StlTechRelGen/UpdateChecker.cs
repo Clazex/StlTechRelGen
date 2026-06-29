@@ -33,8 +33,8 @@ internal sealed partial class UpdateChecker(Config.UpdateConfig config) {
 		}
 
 		AnsiConsole.MarkupLine(Messages.Update.NewVersionFound.FormatLocal(
-			release.HtmlUrl, release.TagName, release.CreatedAt)
-		);
+			release.HtmlUrl, release.TagName, release.CreatedAt
+		));
 		if (!string.IsNullOrWhiteSpace(release.Body)) {
 			Log(Messages.Update.ReleaseBody, release.Body);
 		}

@@ -210,7 +210,7 @@ public static class Program {
 		}
 
 		Playset? playset = db.Playsets
-			.SingleOrDefault(i => i.Name == config.Playset!.Name);
+			.SingleOrDefault(i => i.Name == config.Playset.Name);
 		if (playset == null) {
 			LogError(Messages.Error.PlaysetNotFound);
 			return false;
