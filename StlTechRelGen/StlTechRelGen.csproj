@@ -36,7 +36,7 @@
 		<PackageReference Include="HarmonyX" Version="2.16.1" />
 
 		<PackageReference Include="Tomlyn" Version="2.9.0" />
-		<PackageReference Include="YamlDotNet" Version="18.0.0" />
+		<PackageReference Include="YamlDotNet" Version="18.1.0" />
 
 		<PackageReference Include="GameFinder" Version="4.9.0" />
 
