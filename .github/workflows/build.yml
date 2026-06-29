@@ -1,0 +1,161 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_NAME: StlTechRelGen
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      exists: ${{ steps.check-tag.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Get version
+        id: get-version
+        run: |
+          VERSION=$(dotnet build $PROJECT_NAME -getProperty:Version)
+          echo "version=v$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Check tag
+        uses: mukunku/tag-exists-action@v1.7.0
+        id: check-tag
+        with:
+          tag: ${{ steps.get-version.outputs.version }}
+      - name: Write summary
+        run: |
+          echo "### Version" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.get-version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "### Tag existence" >> $GITHUB_STEP_SUMMARY
+          echo "${{ case(steps.check-tag.outputs.exists == 'false', 'No', 'Yes') }}" >> $GITHUB_STEP_SUMMARY
+
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macos-latest
+            rid: osx-arm64
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v5
+        with:
+          cache: true
+          cache-dependency-path: ${{ env.PROJECT_NAME }}/packages.lock.json
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Format check
+        if: matrix.os == 'ubuntu-latest'
+        run: dotnet format --verify-no-changes
+      - name: Build
+        run: dotnet publish $PROJECT_NAME -r ${{ matrix.rid }} -o artifact/${{ matrix.rid }} --no-restore
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ matrix.rid }}
+          path: artifact/${{ matrix.rid }}
+          compression-level: 9
+
+  release:
+    needs: [version, build]
+    if: |
+      needs.version.outputs.exists == 'false'
+      && github.event_name == 'push'
+      && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Generate changelog
+        # v4 has bug: heredoc EOF is not handled properly, fixed in 11ab60a
+        # but not released yet, so pin to full commit sha.
+        uses: orhun/git-cliff-action@4d0efd7c7a4b55484abf71c29a29712192adebdb
+        id: changelog
+        with:
+          config: .github/cliff.toml
+          args: --latest
+        env:
+          GITHUB_REPO: ${{ github.repository }}
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "*"
+          merge-multiple: false
+          path: artifact
+      - name: Zip artifacts
+        run: |
+          mkdir -p release
+          for dir in artifact/*/; do
+            platform="$(basename "$dir")"
+            echo "::group::Zipping $platform"
+            mv "$dir" "artifact/$PROJECT_NAME"
+            zip -9 -r "release/${PROJECT_NAME}-${{ needs.version.outputs.version }}-${platform}.zip" "artifact/$PROJECT_NAME"
+            rm -rf "artifact/$PROJECT_NAME"
+            echo "::endgroup::"
+          done
+      - name: Generate compare link
+        id: compare-link
+        run: |
+          echo "::debug::Find the previous release tag to build a compare URL for the changelog."
+          echo "::debug::HEAD^ is used because the current HEAD will become the new tag after release."
+          PREV=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV" ]; then
+            echo "compare=**Full Changelog**: <https://github.com/${{ github.repository }}/compare/$PREV...${{ needs.version.outputs.version }}>" >> "$GITHUB_OUTPUT"
+          else
+            echo "::debug::No previous tag found (e.g. first release) — omit the compare link."
+            echo "compare=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Generate attestation
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: release/*.zip
+      - name: Get date
+        id: date
+        run: echo "date=$(date -u +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+      - name: Create release
+        id: create-release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.version.outputs.version }}
+          name: "${{ env.PROJECT_NAME }} ${{ needs.version.outputs.version }}"
+          draft: true
+          files: release/*.zip
+          body: |
+            ## ${{ needs.version.outputs.version }} (${{ steps.date.outputs.date }})
+
+            ${{ steps.changelog.outputs.content }}
+
+            ---
+
+            ${{ steps.compare-link.outputs.compare }}
+            **Build Attestation**: ${{ steps.attest.outputs.attestation-url }}
+      - name: Write summary
+        run: |
+          echo "### Release Draft Created" >> $GITHUB_STEP_SUMMARY
+          echo "<${{ steps.create-release.outputs.url }}>" >> $GITHUB_STEP_SUMMARY
