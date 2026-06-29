@@ -20,7 +20,7 @@
 		<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
 		<DebugType>portable</DebugType>
 
-		<PublishSingleFile>true</PublishSingleFile>
+		<PublishSingleFile>false</PublishSingleFile>
 		<SelfContained>false</SelfContained>
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 	</PropertyGroup>
@@ -33,6 +33,7 @@
 	<ItemGroup>
 		<PackageReference Include="CWTools" Version="0.5.0-alpha" />
 		<PackageReference Include="FSharp.Core" Version="10.1.301" />
+		<PackageReference Include="HarmonyX" Version="2.16.1" />
 
 		<PackageReference Include="Tomlyn" Version="2.9.0" />
 		<PackageReference Include="YamlDotNet" Version="18.0.0" />

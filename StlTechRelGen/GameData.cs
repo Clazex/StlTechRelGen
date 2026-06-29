@@ -38,7 +38,20 @@ internal sealed class GameData {
 	public ReadOnlyDictionary<CWLang, ReadOnlyDictionary<string, string>>
 		Localizations = null!;
 
-	private GameData(Config config, IEnumerable<(string name, string path)> mods) {
+	private GameData(
+		Config config,
+		IEnumerable<(string name, string path)> mods,
+		ProgressContext ctx
+	) {
+		// There are 5 major steps:
+		// 1. ResourceManager<>.updateFiles
+		// 2. LocalisationManager<>.updateAllLocalisationSources #1
+		// 3. LocalisationManager<>.updateProcessedLocalisation #1
+		// 4. LocalisationManager<>.updateAllLocalisationSources #2
+		// 5. LocalisationManager<>.updateProcessedLocalisation #2
+		ProgressTask task = ctx.AddTask(Messages.Progress.LoadingGame)
+			.MaxValue(5);
+
 		string commonDir = Path.Combine(config.Game.GamePath, "common");
 
 		GameDir = new(
@@ -95,6 +108,9 @@ internal sealed class GameData {
 			])
 			.ToFSharpList();
 
+		CWToolsHooks.Init();
+		CWToolsHooks.OnProgress = () => task.Increment(1);
+
 		CWTools.Games.Stellaris.STLGame stellaris = new(
 			new GameSetupSettings<STLLookup>(
 				sourceDirs,
@@ -117,6 +133,9 @@ internal sealed class GameData {
 			.GetField("game", BindingFlags.Instance | BindingFlags.NonPublic)!
 			.GetValue(stellaris)!;
 		Entities = new(Game.Resources.AllEntities.Invoke(null));
+
+
+		task.StopTask();
 	}
 
 	public static GameData LoadWithProgress(
@@ -124,13 +143,9 @@ internal sealed class GameData {
 		Config config,
 		IEnumerable<(string name, string path)> mods
 	) {
-		GameData gameData = Inquiries.RunWithProgress(
-			ctx,
-			Messages.Progress.LoadingGame,
-			() => new GameData(config, mods)
-		);
+		GameData gameData = new(config, mods, ctx);
 
-		Parallel.ForEach([
+		Parallel.Invoke(
 			() => {
 				gameData.LoadScriptedVariables(ctx);
 				// Depends on ScriptedVariables
@@ -138,7 +153,7 @@ internal sealed class GameData {
 			},
 			() => gameData.LoadAuthSuffixes(ctx),
 			() => gameData.LoadLocalization(ctx)
-		], (action) => action.Invoke());
+		);
 
 		return gameData;
 	}

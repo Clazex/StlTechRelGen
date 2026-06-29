@@ -82,10 +82,12 @@ public static class Program {
 				GameData gameData = LoadGameData(ctx, config, mods);
 				L10nBuilder l10nBuilder = BuildL10n(ctx, gameData);
 
-				WriteL10nFragments(ctx, l10nDir);
-				l10nBuilder.WriteFilesWithProgress(
-					ctx,
-					l10nDir.CreateSubdirectory("replace").FullName
+				Parallel.Invoke(
+					() => WriteL10nFragments(ctx, l10nDir),
+					() => l10nBuilder.WriteFilesWithProgress(
+						ctx,
+						l10nDir.CreateSubdirectory("replace").FullName
+					)
 				);
 
 				return (
