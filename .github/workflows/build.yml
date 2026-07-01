@@ -148,13 +148,12 @@ jobs:
           files: release/*.zip
           body: |
             ## ${{ needs.version.outputs.version }} (${{ steps.date.outputs.date }})
-
             ${{ steps.changelog.outputs.content }}
 
             ---
 
             ${{ steps.compare-link.outputs.compare }}
-            **Build Attestation**: ${{ steps.attest.outputs.attestation-url }}
+            **Build Attestation**: <${{ steps.attest.outputs.attestation-url }}>
       - name: Write summary
         run: |
           echo "### Release Draft Created" >> $GITHUB_STEP_SUMMARY
