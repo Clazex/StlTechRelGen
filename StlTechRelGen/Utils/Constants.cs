@@ -23,7 +23,7 @@ internal static class Constants {
 	}
 
 	public static Uri CheckUpdateUrl { get; } =
-		new("https://api.github.com/repos/Clazex/stl-tech-rel-gen/releases/latest");
+		new("https://api.github.com/repos/Clazex/StlTechRelGen/releases/latest");
 
 	// Hardcoded in CWTools to identify vanilla dir
 	// https://github.com/cwtools/cwtools/blob/b377453dee803f9258be92cfc49896d09039702d/CWTools/Game/Stellaris/STLGame.fs#L551
