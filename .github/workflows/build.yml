@@ -114,12 +114,13 @@ jobs:
       - name: Zip artifacts
         run: |
           mkdir -p release
-          for dir in artifact/*/; do
+          cd artifact
+          for dir in */; do
             platform="$(basename "$dir")"
             echo "::group::Zipping $platform"
-            mv "$dir" "artifact/$PROJECT_NAME"
-            zip -9 -r "release/${PROJECT_NAME}-${{ needs.version.outputs.version }}-${platform}.zip" "artifact/$PROJECT_NAME"
-            rm -rf "artifact/$PROJECT_NAME"
+            mv "$dir" "$PROJECT_NAME"
+            zip -9 -r "../release/${PROJECT_NAME}-${{ needs.version.outputs.version }}-${platform}.zip" "$PROJECT_NAME"
+            rm -rf "$PROJECT_NAME"
             echo "::endgroup::"
           done
       - name: Generate compare link
