@@ -53,6 +53,8 @@ writing_l10n = "Writing localization"
 # Data processing warnings
 [data]
 # {0} = tech key
+tech_no_category = "Tech {0} has no category"
+# {0} = tech key
 l10n_entry_not_found = "Localization entry of {0} not found"
 # {0} = tech key, {1} = swap key
 l10n_entry_and_swap_not_found = "Localization entry of {0} and swap {1} not found"

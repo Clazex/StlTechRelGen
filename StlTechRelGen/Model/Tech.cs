@@ -64,10 +64,12 @@ internal sealed class Tech(
 			node.Tag("tier").Value.ToRawString(), "tier", variables
 		);
 
-		List<string> categories = [
-			.. node.Child("category").Value.LeafValues
-				.Select(i => i.ValueText)
-		];
+		List<string> categories = node.Child("category")
+			.Map(x => x.LeafValues.Select(i => i.ValueText).ToList())
+			.UnwrapOr([]);
+		if (categories.Count == 0) {
+			LogWarning(Messages.Data.TechNoCategory, node.Key);
+		}
 
 		int levels = node.Tag("levels")
 			.Map(x => ParseIntOrVariable(x.ToRawString(), "levels", variables))

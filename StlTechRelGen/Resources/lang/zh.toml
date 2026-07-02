@@ -51,6 +51,8 @@ writing_l10n = "正在写入本地化"
 # Data processing warnings
 [data]
 # {0} = tech key
+tech_no_category = "科技 {0} 没有子领域"
+# {0} = tech key
 l10n_entry_not_found = "未找到科技 {0} 的本地化条目"
 # {0} = tech key, {1} = swap key
 l10n_entry_and_swap_not_found = "未找到科技 {0} 与其替换科技 {1} 的本地化条目"

@@ -76,6 +76,7 @@ internal sealed class Lang {
 	}
 
 	internal sealed class DataMessages {
+		public required CompositeFormat TechNoCategory { get; init; }
 		public required CompositeFormat L10nEntryNotFound { get; init; }
 		public required CompositeFormat L10nEntryAndSwapNotFound { get; init; }
 		public required CompositeFormat TechUnknownPrereq { get; init; }
