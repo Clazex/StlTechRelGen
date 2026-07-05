@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: daily
     target-branch: dev
+    commit-message:
+      prefix: "chore: "
     ignore:
       - dependency-name: CWTools
     groups:
@@ -19,6 +21,8 @@ updates:
     schedule:
       interval: daily
     target-branch: dev
+    commit-message:
+      prefix: "chore: "
     groups:
       actions:
         patterns:
