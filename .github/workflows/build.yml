@@ -7,9 +7,11 @@ on:
     paths-ignore:
       - "**/*.md"
   pull_request:
+    paths-ignore:
+      - "**/*.md"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 env:
@@ -20,6 +22,10 @@ permissions:
 
 jobs:
   version:
+    # Runs on pushes or PRs from a fork. Same-repo PRs are covered by push.
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get-version.outputs.version }}
@@ -44,6 +50,9 @@ jobs:
           echo "${{ case(steps.check-tag.outputs.exists == 'false', 'No', 'Yes') }}" >> $GITHUB_STEP_SUMMARY
 
   build:
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)
     strategy:
       fail-fast: false
       matrix:
