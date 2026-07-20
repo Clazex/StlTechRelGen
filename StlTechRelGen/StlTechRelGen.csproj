@@ -56,7 +56,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="CWTools" Version="0.5.0-alpha" />
-		<PackageReference Include="FSharp.Core" Version="10.1.301" />
+		<PackageReference Include="FSharp.Core" Version="10.1.302" />
 		<PackageReference Include="HarmonyX" Version="2.16.1" />
 
 		<PackageReference Include="Tomlyn" Version="2.10.1" />
@@ -64,23 +64,23 @@
 
 		<PackageReference Include="GameFinder" Version="4.9.0" />
 
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="10.0.9" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="10.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="SQLitePCLRaw.config.e_sqlite3" Version="3.0.3" />
+		<PackageReference Include="SQLitePCLRaw.config.e_sqlite3" Version="3.0.4" />
 		<!--
 			Use newer shipped native SQLite builds instead of the vulnerable
 			SQLitePCLRaw.lib.e_sqlite3 package (CVE-2025-6965) used by
 			Microsoft.EntityFrameworkCore.Sqlite
 		-->
-		<PackageReference Include="SourceGear.sqlite3" Version="3.50.4.5" />
+		<PackageReference Include="SourceGear.sqlite3" Version="3.53.3" />
 
 		<PackageReference Include="Spectre.Console" Version="0.57.2" />
 		<PackageReference Include="Spectre.Console.Cli" Version="0.55.0" />
 
-		<PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.9" />
+		<PackageReference Include="Microsoft.NET.ILLink.Tasks" Version="10.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>
