@@ -70,7 +70,7 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v6
         with:
           cache: true
           cache-dependency-path: ${{ env.PROJECT_NAME }}/packages.lock.json
@@ -107,7 +107,7 @@ jobs:
       - name: Generate changelog
         # v4 has bug: heredoc EOF is not handled properly, fixed in 11ab60a
         # but not released yet, so pin to full commit sha.
-        uses: orhun/git-cliff-action@4d0efd7c7a4b55484abf71c29a29712192adebdb
+        uses: orhun/git-cliff-action@3d96a18cc4ec17e9dc69ddcc424ccafaf1f78ce2
         id: changelog
         with:
           config: .github/cliff.toml
