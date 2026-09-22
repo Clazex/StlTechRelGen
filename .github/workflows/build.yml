@@ -32,6 +32,10 @@ jobs:
       exists: ${{ steps.check-tag.outputs.exists }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            StlTechRelGen/StlTechRelGen.csproj
+          sparse-checkout-cone-mode: false
       - name: Get version
         id: get-version
         run: |
