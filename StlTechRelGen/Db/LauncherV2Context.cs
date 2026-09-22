@@ -15,7 +15,6 @@ internal sealed partial class LauncherV2DbContext(
 	protected override void OnConfiguring(
 		DbContextOptionsBuilder optionsBuilder
 	) => optionsBuilder
-		.UseModel(LauncherV2DbContextModel.Instance)
 		.UseSqlite(
 			new SqliteConnectionStringBuilder() {
 				DataSource = Path.Combine(config.DocumentPath, "launcher-v2.sqlite"),
