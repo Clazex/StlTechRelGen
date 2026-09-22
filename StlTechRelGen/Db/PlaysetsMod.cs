@@ -18,10 +18,4 @@ public partial class PlaysetsMod {
 
 	[Column("position")]
 	public int? Position { get; set; }
-
-	[ForeignKey("ModId")]
-	public virtual Mod Mod { get; set; } = null!;
-
-	[ForeignKey("PlaysetId")]
-	public virtual Playset Playset { get; set; } = null!;
 }
